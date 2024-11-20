@@ -61,8 +61,6 @@ class Y8PlatformBridge extends PlatformBridgeBase {
                             addAdsByGoogle({
                                 hostId: this._options.hostId,
                                 adsenseId: this._options.adsenseId,
-                                adFrequency: this._options.adFrequency,
-                                testAdsOn: this._options.testAdsOn,
                             }).then(() => {
                                 this._showAd = (o) => { window.adsbygoogle.push(o) }
 
