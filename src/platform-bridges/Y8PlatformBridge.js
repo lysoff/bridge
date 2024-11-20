@@ -16,7 +16,7 @@
  */
 
 import PlatformBridgeBase from './PlatformBridgeBase'
-import { addJavaScript, waitFor } from '../common/utils'
+import { addAdsByGoogle, addJavaScript, waitFor } from '../common/utils'
 import {
     PLATFORM_ID,
     ACTION_NAME,
@@ -50,15 +50,28 @@ class Y8PlatformBridge extends PlatformBridgeBase {
         if (!promiseDecorator) {
             promiseDecorator = this._createPromiseDecorator(ACTION_NAME.INITIALIZE)
 
-            if (!this._options || !this._options.gameId) {
-                this._rejectPromiseDecorator(ACTION_NAME.INITIALIZE, ERROR.Y8_GAME_ID_IS_UNDEFINED)
+            if (!this._options?.gameId || !this._options?.adsenseId || !this._options?.hostId) {
+                this._rejectPromiseDecorator(ACTION_NAME.INITIALIZE, ERROR.Y8_GAME_PARAMS_NOT_FOUND)
             } else {
                 addJavaScript(SDK_URL).then(() => {
                     waitFor('ID').then(() => {
                         this._platformSdk = window.ID
 
                         this._platformSdk.Event.subscribe('id.init', (() => {
-                            this._platformSdk.ads.init(this._options.gameId)
+                            addAdsByGoogle({
+                                hostId: this._options.hostId,
+                                adsenseId: this._options.adsenseId,
+                                adFrequency: this._options.adFrequency,
+                                testAdsOn: this._options.testAdsOn,
+                            }).then(() => {
+                                this._showAd = (o) => { window.adsbygoogle.push(o) }
+
+                                window.adsbygoogle.push({
+                                    preloadAdBreaks: 'on',
+                                    sound: 'on',
+                                    onReady: () => {},
+                                })
+                            })
 
                             this._platformSdk.getLoginStatus((data) => {
                                 this.#updatePlayerInfo(data)
@@ -195,25 +208,55 @@ class Y8PlatformBridge extends PlatformBridgeBase {
 
     // advertisement
     showInterstitial() {
-        this._setInterstitialState(INTERSTITIAL_STATE.OPENED)
-        this._platformSdk.ads.display(() => {
-            if (!this._platformSdk.ads.strategy) {
-                this._setInterstitialState(INTERSTITIAL_STATE.FAILED)
-            } else {
-                this._setInterstitialState(INTERSTITIAL_STATE.CLOSED)
-            }
+        if (!this._showAd) {
+            this._setInterstitialState(INTERSTITIAL_STATE.FAILED)
+            return
+        }
+
+        this._showAd({
+            type: 'start',
+            name: 'start-game',
+            beforeAd: () => {
+                this._setInterstitialState(INTERSTITIAL_STATE.OPENED)
+            },
+            afterAd: () => {
+                if (this.interstitialState !== INTERSTITIAL_STATE.FAILED) {
+                    this._setInterstitialState(INTERSTITIAL_STATE.CLOSED)
+                }
+            },
+            adBreakDone: (placementInfo) => {
+                if (placementInfo.breakStatus !== 'viewed') {
+                    this._setInterstitialState(INTERSTITIAL_STATE.FAILED)
+                }
+            },
         })
     }
 
     showRewarded() {
-        this._setRewardedState(REWARDED_STATE.OPENED)
-        this._platformSdk.ads.display(() => {
-            if (!this._platformSdk.ads.strategy) {
-                this._setRewardedState(REWARDED_STATE.FAILED)
-            } else {
-                this._setRewardedState(REWARDED_STATE.REWARDED)
-                this._setRewardedState(REWARDED_STATE.CLOSED)
-            }
+        if (!this._showAd) {
+            this._setRewardedState(REWARDED_STATE.FAILED)
+            return
+        }
+
+        this._showAd({
+            type: 'reward',
+            name: 'rewarded Ad',
+            beforeAd: () => {
+                this._setRewardedState(REWARDED_STATE.OPENED)
+            },
+            afterAd: () => {
+                if (this.rewardedState !== REWARDED_STATE.FAILED) {
+                    this._setRewardedState(REWARDED_STATE.CLOSED)
+                }
+            },
+            beforeReward: (showAdFn) => { showAdFn(0) },
+            adDismissed: () => { this._setRewardedState(REWARDED_STATE.FAILED) },
+            adViewed: () => { this._setRewardedState(REWARDED_STATE.REWARDED) },
+            adBreakDone: (placementInfo) => {
+                if (placementInfo.breakStatus === 'frequencyCapped' || placementInfo.breakStatus === 'other') {
+                    this._setRewardedState(REWARDED_STATE.FAILED)
+                }
+            },
         })
     }
 
