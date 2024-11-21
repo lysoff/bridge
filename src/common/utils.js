@@ -25,13 +25,12 @@ export const addJavaScript = function addJavaScript(src) {
 }
 
 export const addAdsByGoogle = ({
-    hostId, adsenseId, adFrequency = '180s', testAdsOn = false,
+    hostId, adsenseId,
 }) => new Promise((resolve) => {
     const script = document.createElement('script')
     script.setAttribute('data-ad-host', hostId)
     script.setAttribute('data-ad-client', adsenseId)
-    script.setAttribute('data-ad-frequency-hint', adFrequency)
-    if (testAdsOn) { script.setAttribute('data-adbreak-test', 'on') }
+    script.setAttribute('data-ad-frequency-hint', '30s')
     script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js'
 
     script.addEventListener('load', resolve)
