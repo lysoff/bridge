@@ -46,6 +46,7 @@ export const MODULE_NAME = {
     PAYMENTS: 'payments',
     REMOTE_CONFIG: 'remote_config',
     CLIPBOARD: 'clipboard',
+    ACHIEVEMENTS: 'achievements',
 }
 
 export const EVENT_NAME = {

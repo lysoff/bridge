@@ -206,6 +206,19 @@ class PlatformBridgeBase {
         return true
     }
 
+    // achievements
+    get isAchievementsSupported() {
+        return false
+    }
+
+    get isGetAchievementsSupported() {
+        return false
+    }
+
+    get isAchievementNativePopupSupported() {
+        return false
+    }
+
     _isInitialized = false
 
     _platformSdk = null
@@ -517,6 +530,19 @@ class PlatformBridgeBase {
             return window.navigator.clipboard.writeText(text)
         }
 
+        return Promise.reject()
+    }
+
+    // achievements
+    unlockAchievement() {
+        return Promise.reject()
+    }
+
+    getAchievements() {
+        return Promise.reject()
+    }
+
+    showAchievementNativePopup() {
         return Promise.reject()
     }
 
