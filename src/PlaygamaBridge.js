@@ -47,7 +47,6 @@ import YandexPlatformBridge from './platform-bridges/YandexPlatformBridge'
 import CrazyGamesPlatformBridge from './platform-bridges/CrazyGamesPlatformBridge'
 import AbsoluteGamesPlatformBridge from './platform-bridges/AbsoluteGamesPlatformBridge'
 import GameDistributionPlatformBridge from './platform-bridges/GameDistributionPlatformBridge'
-import VkPlayPlatformBridge from './platform-bridges/VkPlayPlatformBridge'
 import OkPlatformBridge from './platform-bridges/OkPlatformBridge'
 import PlaygamaPlatformBridge from './platform-bridges/PlaygamaPlatformBridge'
 import PlayDeckPlatformBridge from './platform-bridges/PlayDeckPlatformBridge'
@@ -246,10 +245,6 @@ class PlaygamaBridge {
         switch (platformId) {
             case PLATFORM_ID.VK: {
                 this.#platformBridge = new VkPlatformBridge(_options)
-                break
-            }
-            case PLATFORM_ID.VK_PLAY: {
-                this.#platformBridge = new VkPlayPlatformBridge(_options)
                 break
             }
             case PLATFORM_ID.YANDEX: {
