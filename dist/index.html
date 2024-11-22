@@ -393,9 +393,6 @@
                         'game_distribution': {
                             gameId: ''
                         },
-                        'vk_play': {
-                            gameId: ''
-                        },
                         'telegram': {
                             adsgramBlockId: ''
                         },
@@ -746,15 +743,6 @@
                 paymentsPurchaseButton.addEventListener('click', () => {
                     bridge.payments.purchase({
                         'yandex': document.getElementById('payments-id-input').value,
-                        'vk_play': {
-                            'merchant_param': {
-                                'amount': 100,
-                                'currency': 'RUB',
-                                'description': 'your description',
-                                'item_id': '776',
-                                'additional_param': 1
-                            }
-                        },
                         'playdeck': {
                             'amount': 1,
                             'description': 'your description',
