@@ -274,7 +274,7 @@ class Y8PlatformBridge extends PlatformBridgeBase {
     // achievements
     unlockAchievement(options) {
         if (!options.achievement || !options.achievementkey) {
-            return Promise.resolve()
+            return Promise.reject()
         }
 
         return new Promise((resolve) => {
