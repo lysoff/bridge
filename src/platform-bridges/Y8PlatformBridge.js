@@ -46,11 +46,11 @@ class Y8PlatformBridge extends PlatformBridgeBase {
         return true
     }
 
-    get isAchievementsNativePopupSupported() {
+    get isGetAchievementsListSupported() {
         return true
     }
 
-    get isGetAchievementsSupported() {
+    get isAchievementsNativePopupSupported() {
         return true
     }
 
@@ -284,7 +284,7 @@ class Y8PlatformBridge extends PlatformBridgeBase {
         })
     }
 
-    getAchievements(options) {
+    getAchievementsList(options) {
         return new Promise((resolve) => {
             this._platformSdk.GameAPI.Achievements.listCustom(options, (data) => {
                 resolve(data)

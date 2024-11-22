@@ -22,8 +22,8 @@ class AchievementsModule extends ModuleBase {
         return this._platformBridge.isAchievementsSupported
     }
 
-    get isGetAchievementsSupported() {
-        return this._platformBridge.isGetAchievementsSupported
+    get isGetListSupported() {
+        return this._platformBridge.isGetAchievementsListSupported
     }
 
     get isNativePopupSupported() {
@@ -41,15 +41,15 @@ class AchievementsModule extends ModuleBase {
         return this._platformBridge.unlockAchievement(options)
     }
 
-    getAchievements(options) {
+    getList(options) {
         if (options) {
             const platformDependedOptions = options[this._platformBridge.platformId]
             if (platformDependedOptions) {
-                return this.getAchievements(platformDependedOptions)
+                return this.getList(platformDependedOptions)
             }
         }
 
-        return this._platformBridge.getAchievements(options)
+        return this._platformBridge.getAchievementsList(options)
     }
 
     showNativePopup(options) {

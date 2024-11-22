@@ -211,7 +211,7 @@ class PlatformBridgeBase {
         return false
     }
 
-    get isGetAchievementsSupported() {
+    get isGetAchievementsListSupported() {
         return false
     }
 
@@ -538,7 +538,7 @@ class PlatformBridgeBase {
         return Promise.reject()
     }
 
-    getAchievements() {
+    getAchievementsList() {
         return Promise.reject()
     }
 
