@@ -41,6 +41,19 @@ class Y8PlatformBridge extends PlatformBridgeBase {
         return true
     }
 
+    // achievements
+    get isAchievementsSupported() {
+        return true
+    }
+
+    get isAchievementsNativePopupSupported() {
+        return true
+    }
+
+    get isGetAchievementsSupported() {
+        return true
+    }
+
     initialize() {
         if (this._isInitialized) {
             return Promise.resolve()
@@ -256,6 +269,31 @@ class Y8PlatformBridge extends PlatformBridgeBase {
                 }
             },
         })
+    }
+
+    // achievements
+    unlockAchievement(options) {
+        if (!options.achievement || !options.achievementkey) {
+            return Promise.resolve()
+        }
+
+        return new Promise((resolve) => {
+            this._platformSdk.GameAPI.Achievements.save(options, (data) => {
+                resolve(data)
+            })
+        })
+    }
+
+    getAchievements(options) {
+        return new Promise((resolve) => {
+            this._platformSdk.GameAPI.Achievements.listCustom(options, (data) => {
+                resolve(data)
+            })
+        })
+    }
+
+    showAchievementNativePopup(options) {
+        this._platformSdk.GameAPI.Achievements.list(options)
     }
 
     #getUserDataFromStorage() {

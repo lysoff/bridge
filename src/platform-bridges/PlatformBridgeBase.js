@@ -215,7 +215,7 @@ class PlatformBridgeBase {
         return false
     }
 
-    get isAchievementNativePopupSupported() {
+    get isAchievementsNativePopupSupported() {
         return false
     }
 
