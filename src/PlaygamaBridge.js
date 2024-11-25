@@ -103,6 +103,10 @@ class PlaygamaBridge {
         return this.#getModule(MODULE_NAME.PAYMENTS)
     }
 
+    get achievements() {
+        return this.#getModule(MODULE_NAME.ACHIEVEMENTS)
+    }
+
     get remoteConfig() {
         return this.#getModule(MODULE_NAME.REMOTE_CONFIG)
     }

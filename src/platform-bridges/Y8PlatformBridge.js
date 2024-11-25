@@ -273,6 +273,10 @@ class Y8PlatformBridge extends PlatformBridgeBase {
 
     // achievements
     unlockAchievement(options) {
+        if (!this._isPlayerAuthorized) {
+            return Promise.reject()
+        }
+
         if (!options.achievement || !options.achievementkey) {
             return Promise.reject()
         }
@@ -292,8 +296,9 @@ class Y8PlatformBridge extends PlatformBridgeBase {
         })
     }
 
-    showAchievementNativePopup(options) {
+    showAchievementsNativePopup(options) {
         this._platformSdk.GameAPI.Achievements.list(options)
+        return Promise.resolve()
     }
 
     #getUserDataFromStorage() {

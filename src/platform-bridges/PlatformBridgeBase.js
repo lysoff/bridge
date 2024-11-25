@@ -542,7 +542,7 @@ class PlatformBridgeBase {
         return Promise.reject()
     }
 
-    showAchievementNativePopup() {
+    showAchievementsNativePopup() {
         return Promise.reject()
     }
 
