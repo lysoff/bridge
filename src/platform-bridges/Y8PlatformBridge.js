@@ -289,9 +289,20 @@ class Y8PlatformBridge extends PlatformBridgeBase {
     }
 
     getAchievementsList(options) {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             this._platformSdk.GameAPI.Achievements.listCustom(options, (data) => {
-                resolve(data)
+                if (data.success) {
+                    resolve(data.achievements.map(({ player, ...achievement }) => ({
+                        ...achievement,
+                        playerid: player.playerid,
+                        playername: player.playername,
+                        lastupdated: player.lastupdated,
+                        date: player.date,
+                        rdate: player.rdate,
+                    })))
+                } else {
+                    reject(new Error(data.errorcode))
+                }
             })
         })
     }
