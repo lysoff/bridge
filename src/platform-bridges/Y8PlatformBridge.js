@@ -50,7 +50,7 @@ class Y8PlatformBridge extends PlatformBridgeBase {
         if (!promiseDecorator) {
             promiseDecorator = this._createPromiseDecorator(ACTION_NAME.INITIALIZE)
 
-            if (!this._options?.gameId || !this._options?.adsenseId || !this._options?.hostId) {
+            if (!this._options?.gameId) {
                 this._rejectPromiseDecorator(ACTION_NAME.INITIALIZE, ERROR.Y8_GAME_PARAMS_NOT_FOUND)
             } else {
                 addJavaScript(SDK_URL).then(() => {
@@ -61,6 +61,7 @@ class Y8PlatformBridge extends PlatformBridgeBase {
                             addAdsByGoogle({
                                 hostId: this._options.hostId,
                                 adsenseId: this._options.adsenseId,
+                                channelId: this._options.channelId,
                             }).then(() => {
                                 this._showAd = (o) => { window.adsbygoogle.push(o) }
 
