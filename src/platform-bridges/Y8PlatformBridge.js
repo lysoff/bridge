@@ -29,6 +29,7 @@ import {
 const SDK_URL = 'https://cdn.y8.com/api/sdk.js'
 const USERDATA_KEY = 'userData'
 const NOT_FOUND_ERROR = 'Key not found'
+const ADS_ID = '6129580795478709'
 
 class Y8PlatformBridge extends PlatformBridgeBase {
     // platform
@@ -59,8 +60,10 @@ class Y8PlatformBridge extends PlatformBridgeBase {
 
                         this._platformSdk.Event.subscribe('id.init', (() => {
                             addAdsByGoogle({
-                                hostId: this._options.hostId,
-                                adsenseId: this._options.adsenseId,
+                                hostId: `ca-host-pub-${ADS_ID}`,
+                                adsenseId: this._options.channelId
+                                    ? `ca-pub-${ADS_ID}`
+                                    : this._options.adsenseId,
                                 channelId: this._options.channelId,
                             }).then(() => {
                                 this._showAd = (o) => { window.adsbygoogle.push(o) }
