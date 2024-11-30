@@ -294,9 +294,15 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
 
     getDataFromStorage(key, storageType, tryParseJson) {
         if (storageType === STORAGE_TYPE.PLATFORM_INTERNAL) {
+            const messageId = this.#messageBroker.generateMessageId()
+
             return new Promise((resolve) => {
                 const messageHandler = ({ data }) => {
-                    if (data?.type === MODULE_NAME.STORAGE && data.action === ACTION_NAME_QA.GET_DATA_FROM_STORAGE) {
+                    if (
+                        data?.type === MODULE_NAME.STORAGE
+                        && data.action === ACTION_NAME_QA.GET_DATA_FROM_STORAGE
+                        && data.id === messageId
+                    ) {
                         const values = Object.values(data.storage)
                         resolve(values)
                         this.#messageBroker.removeListener(messageHandler)
@@ -309,6 +315,7 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
                     type: MODULE_NAME.STORAGE,
                     action: ACTION_NAME_QA.GET_DATA_FROM_STORAGE,
                     options: { key, storageType, tryParseJson },
+                    id: messageId,
                 })
             })
         }
