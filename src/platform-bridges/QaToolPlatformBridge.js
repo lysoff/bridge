@@ -243,9 +243,14 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
     getServerTime() {
         return new Promise((resolve, reject) => {
             let timeoutId
+            const messageId = this.#messageBroker.generateMessageId()
 
             const messageHandler = ({ data }) => {
-                if (data?.type === MODULE_NAME.PLATFORM && data.action === ACTION_NAME_QA.GET_SERVER_TIME) {
+                if (
+                    data?.type === MODULE_NAME.PLATFORM
+                    && data.action === ACTION_NAME_QA.GET_SERVER_TIME
+                    && data.id === messageId
+                ) {
                     if (!data.time) {
                         reject(new Error('Invalid server time'))
                         return
@@ -261,6 +266,7 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
             this.#messageBroker.send({
                 type: MODULE_NAME.PLATFORM,
                 action: ACTION_NAME_QA.GET_SERVER_TIME,
+                id: messageId,
             })
 
             timeoutId = setTimeout(() => {
