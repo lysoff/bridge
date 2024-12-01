@@ -314,8 +314,8 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
                 this.#messageBroker.send({
                     type: MODULE_NAME.STORAGE,
                     action: ACTION_NAME_QA.GET_DATA_FROM_STORAGE,
-                    options: { key, storageType, tryParseJson },
                     id: messageId,
+                    options: { key, storageType, tryParseJson },
                 })
             })
         }

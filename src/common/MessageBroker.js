@@ -22,15 +22,15 @@ export default class MessageBroker {
         }
     }
 
-    generateMessageId() {
-        return `${Date.now()}-${Math.random()}`
-    }
-
     addListener(callback) {
         window.addEventListener('message', callback)
     }
 
     removeListener(callback) {
         window.removeEventListener('message', callback)
+    }
+
+    generateMessageId() {
+        return `${Date.now()}-${Math.random()}`
     }
 }
