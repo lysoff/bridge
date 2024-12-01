@@ -582,8 +582,14 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
         if (!promiseDecorator) {
             promiseDecorator = this._createPromiseDecorator(ACTION_NAME.PURCHASE)
 
+            const messageId = this.#messageBroker.generateMessageId()
+
             const messageHandler = ({ data }) => {
-                if (data?.type === MODULE_NAME.PAYMENTS && data.action === ACTION_NAME.PURCHASE) {
+                if (
+                    data?.type === MODULE_NAME.PAYMENTS
+                    && data.action === ACTION_NAME.PURCHASE
+                    && data.id === messageId
+                ) {
                     if (!data.purchase || typeof data.purchase !== 'object') {
                         this._rejectPromiseDecorator(ACTION_NAME.PURCHASE, new Error('Invalid purchase'))
                         return
@@ -599,6 +605,7 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
             this.#messageBroker.send({
                 type: MODULE_NAME.PAYMENTS,
                 action: ACTION_NAME.PURCHASE,
+                id: messageId,
             })
         }
 
@@ -610,8 +617,14 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
         if (!promiseDecorator) {
             promiseDecorator = this._createPromiseDecorator(ACTION_NAME.GET_PURCHASES)
 
+            const messageId = this.#messageBroker.generateMessageId()
+
             const messageHandler = ({ data }) => {
-                if (data?.type === MODULE_NAME.PAYMENTS && data.action === ACTION_NAME.GET_PURCHASES) {
+                if (
+                    data?.type === MODULE_NAME.PAYMENTS
+                    && data.action === ACTION_NAME.GET_PURCHASES
+                    && data.id === messageId
+                ) {
                     this._resolvePromiseDecorator(ACTION_NAME.GET_PURCHASES, data.purchases)
                     this.#messageBroker.removeListener(messageHandler)
                 }
@@ -622,6 +635,7 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
             this.#messageBroker.send({
                 type: MODULE_NAME.PAYMENTS,
                 action: ACTION_NAME.GET_PURCHASES,
+                id: messageId,
             })
         }
 
@@ -633,8 +647,14 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
         if (!promiseDecorator) {
             promiseDecorator = this._createPromiseDecorator(ACTION_NAME.GET_CATALOG)
 
+            const messageId = this.#messageBroker.generateMessageId()
+
             const messageHandler = ({ data }) => {
-                if (data?.type === MODULE_NAME.PAYMENTS && data.action === ACTION_NAME.GET_CATALOG) {
+                if (
+                    data?.type === MODULE_NAME.PAYMENTS
+                    && data.action === ACTION_NAME.GET_CATALOG
+                    && data.id === messageId
+                ) {
                     this._resolvePromiseDecorator(ACTION_NAME.GET_CATALOG, data.catalog)
                     this.#messageBroker.removeListener(messageHandler)
                 }
@@ -645,6 +665,7 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
             this.#messageBroker.send({
                 type: MODULE_NAME.PAYMENTS,
                 action: ACTION_NAME.GET_CATALOG,
+                id: messageId,
             })
         }
 
@@ -656,8 +677,14 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
         if (!promiseDecorator) {
             promiseDecorator = this._createPromiseDecorator(ACTION_NAME.CONSUME_PURCHASE)
 
+            const messageId = this.#messageBroker.generateMessageId()
+
             const messageHandler = ({ data }) => {
-                if (data?.type === MODULE_NAME.PAYMENTS && data.action === ACTION_NAME.CONSUME_PURCHASE) {
+                if (
+                    data?.type === MODULE_NAME.PAYMENTS
+                    && data.action === ACTION_NAME.CONSUME_PURCHASE
+                    && data.id === messageId
+                ) {
                     this._resolvePromiseDecorator(ACTION_NAME.CONSUME_PURCHASE, data.result)
                     this.#messageBroker.removeListener(messageHandler)
                 }
@@ -668,6 +695,7 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
             this.#messageBroker.send({
                 type: MODULE_NAME.PAYMENTS,
                 action: ACTION_NAME.CONSUME_PURCHASE,
+                id: messageId,
             })
         }
         return promiseDecorator.promise
