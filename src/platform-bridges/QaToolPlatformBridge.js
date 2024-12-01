@@ -180,8 +180,14 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
         if (!promiseDecorator) {
             promiseDecorator = this._createPromiseDecorator(ACTION_NAME.AUTHORIZE_PLAYER)
 
+            const messageId = this.#messageBroker.generateMessageId()
+
             const messageHandler = ({ data }) => {
-                if (data?.type === MODULE_NAME.PLAYER && data.action === ACTION_NAME.AUTHORIZE_PLAYER) {
+                if (
+                    data?.type === MODULE_NAME.PLAYER
+                    && data.action === ACTION_NAME.AUTHORIZE_PLAYER
+                    && data.id === messageId
+                ) {
                     const { player } = data
 
                     this._isPlayerAuthorized = true
@@ -203,6 +209,7 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
             this.#messageBroker.send({
                 type: MODULE_NAME.PLAYER,
                 action: ACTION_NAME.AUTHORIZE_PLAYER,
+                id: messageId,
             })
         }
 
