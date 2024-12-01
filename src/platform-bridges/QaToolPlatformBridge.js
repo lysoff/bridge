@@ -821,9 +821,12 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
     }
 
     getLeaderboardScore(options) {
-        let promiseDecorator = this._getPromiseDecorator(ACTION_NAME.GET_LEADERBOARD_SCORE)
+        const leaderboardName = options?.yandex?.leaderboardName
+        const decoratorKey = `${ACTION_NAME.GET_LEADERBOARD_SCORE}_${leaderboardName}`
+
+        let promiseDecorator = this._getPromiseDecorator(decoratorKey)
         if (!promiseDecorator) {
-            promiseDecorator = this._createPromiseDecorator(ACTION_NAME.GET_LEADERBOARD_SCORE)
+            promiseDecorator = this._createPromiseDecorator(decoratorKey)
 
             const messageId = this.#messageBroker.generateMessageId()
 
@@ -832,8 +835,9 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
                     data?.type === MODULE_NAME.LEADERBOARD
                     && data.action === ACTION_NAME.GET_LEADERBOARD_SCORE
                     && data.id === messageId
+                    && data.leaderboardName === leaderboardName
                 ) {
-                    this._resolvePromiseDecorator(ACTION_NAME.GET_LEADERBOARD_SCORE, data.score)
+                    this._resolvePromiseDecorator(decoratorKey, data.score)
                     this.#messageBroker.removeListener(messageHandler)
                 }
             }
@@ -844,6 +848,7 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
                 type: MODULE_NAME.LEADERBOARD,
                 action: ACTION_NAME.GET_LEADERBOARD_SCORE,
                 id: messageId,
+                leaderboardName,
                 options,
             })
         }
