@@ -739,8 +739,14 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
         if (!promiseDecorator) {
             promiseDecorator = this._createPromiseDecorator(ACTION_NAME.CLIPBOARD_WRITE)
 
+            const messageId = this.#messageBroker.generateMessageId()
+
             const messageHandler = ({ data }) => {
-                if (data?.type === MODULE_NAME.CLIPBOARD && data.action === ACTION_NAME.CLIPBOARD_WRITE) {
+                if (
+                    data?.type === MODULE_NAME.CLIPBOARD
+                    && data.action === ACTION_NAME.CLIPBOARD_WRITE
+                    && data.id === messageId
+                ) {
                     this._resolvePromiseDecorator(ACTION_NAME.CLIPBOARD_WRITE, true)
                     this.#messageBroker.removeListener(messageHandler)
                 }
@@ -751,6 +757,7 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
             this.#messageBroker.send({
                 type: MODULE_NAME.CLIPBOARD,
                 action: ACTION_NAME.CLIPBOARD_WRITE,
+                id: messageId,
                 options: { text },
             })
         }
@@ -763,8 +770,14 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
         if (!promiseDecorator) {
             promiseDecorator = this._createPromiseDecorator(ACTION_NAME_QA.CLIPBOARD_READ)
 
+            const messageId = this.#messageBroker.generateMessageId()
+
             const messageHandler = ({ data }) => {
-                if (data?.type === MODULE_NAME.CLIPBOARD && data.action === ACTION_NAME_QA.CLIPBOARD_READ) {
+                if (
+                    data?.type === MODULE_NAME.CLIPBOARD
+                    && data.action === ACTION_NAME_QA.CLIPBOARD_READ
+                    && data.id === messageId
+                ) {
                     const { text } = data
                     this._resolvePromiseDecorator(ACTION_NAME_QA.CLIPBOARD_READ, text)
                     this.#messageBroker.removeListener(messageHandler)
@@ -776,6 +789,7 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
             this.#messageBroker.send({
                 type: MODULE_NAME.CLIPBOARD,
                 action: ACTION_NAME_QA.CLIPBOARD_READ,
+                id: messageId,
                 options: {},
             })
         }
