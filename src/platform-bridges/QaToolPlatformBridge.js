@@ -707,8 +707,14 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
         if (!promiseDecorator) {
             promiseDecorator = this._createPromiseDecorator(ACTION_NAME.GET_REMOTE_CONFIG)
 
+            const messageId = this.#messageBroker.generateMessageId()
+
             const messageHandler = ({ data }) => {
-                if (data?.type === MODULE_NAME.REMOTE_CONFIG && data.action === ACTION_NAME.GET_REMOTE_CONFIG) {
+                if (
+                    data?.type === MODULE_NAME.REMOTE_CONFIG
+                    && data.action === ACTION_NAME.GET_REMOTE_CONFIG
+                    && data.id === messageId
+                ) {
                     this._resolvePromiseDecorator(ACTION_NAME.GET_REMOTE_CONFIG, data.result)
                     this.#messageBroker.removeListener(messageHandler)
                 }
@@ -719,6 +725,7 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
             this.#messageBroker.send({
                 type: MODULE_NAME.REMOTE_CONFIG,
                 action: ACTION_NAME.GET_REMOTE_CONFIG,
+                id: messageId,
             })
         }
 
