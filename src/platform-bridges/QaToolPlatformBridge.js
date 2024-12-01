@@ -825,8 +825,14 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
         if (!promiseDecorator) {
             promiseDecorator = this._createPromiseDecorator(ACTION_NAME.GET_LEADERBOARD_SCORE)
 
+            const messageId = this.#messageBroker.generateMessageId()
+
             const messageHandler = ({ data }) => {
-                if (data?.type === MODULE_NAME.LEADERBOARD && data.action === ACTION_NAME.GET_LEADERBOARD_SCORE) {
+                if (
+                    data?.type === MODULE_NAME.LEADERBOARD
+                    && data.action === ACTION_NAME.GET_LEADERBOARD_SCORE
+                    && data.id === messageId
+                ) {
                     this._resolvePromiseDecorator(ACTION_NAME.GET_LEADERBOARD_SCORE, data.score)
                     this.#messageBroker.removeListener(messageHandler)
                 }
@@ -837,6 +843,7 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
             this.#messageBroker.send({
                 type: MODULE_NAME.LEADERBOARD,
                 action: ACTION_NAME.GET_LEADERBOARD_SCORE,
+                id: messageId,
                 options,
             })
         }
@@ -849,10 +856,13 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
         if (!promiseDecorator) {
             promiseDecorator = this._createPromiseDecorator(ACTION_NAME.GET_LEADERBOARD_ENTRIES)
 
+            const messageId = this.#messageBroker.generateMessageId()
+
             const messageHandler = (event) => {
                 if (
                     event.data?.type === MODULE_NAME.LEADERBOARD
                     && event.data.action === ACTION_NAME.GET_LEADERBOARD_ENTRIES
+                    && event.data.id === messageId
                 ) {
                     this._resolvePromiseDecorator(ACTION_NAME.GET_LEADERBOARD_ENTRIES, event.data.entries)
                     this.#messageBroker.removeListener(messageHandler)
@@ -864,6 +874,7 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
             this.#messageBroker.send({
                 type: MODULE_NAME.LEADERBOARD,
                 action: ACTION_NAME.GET_LEADERBOARD_ENTRIES,
+                id: messageId,
                 options,
             })
         }
