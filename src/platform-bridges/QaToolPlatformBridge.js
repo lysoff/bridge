@@ -180,8 +180,14 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
         if (!promiseDecorator) {
             promiseDecorator = this._createPromiseDecorator(ACTION_NAME.AUTHORIZE_PLAYER)
 
+            const messageId = this.#messageBroker.generateMessageId()
+
             const messageHandler = ({ data }) => {
-                if (data?.type === MODULE_NAME.PLAYER && data.action === ACTION_NAME.AUTHORIZE_PLAYER) {
+                if (
+                    data?.type === MODULE_NAME.PLAYER
+                    && data.action === ACTION_NAME.AUTHORIZE_PLAYER
+                    && data.id === messageId
+                ) {
                     const { player } = data
 
                     this._isPlayerAuthorized = true
@@ -203,6 +209,7 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
             this.#messageBroker.send({
                 type: MODULE_NAME.PLAYER,
                 action: ACTION_NAME.AUTHORIZE_PLAYER,
+                id: messageId,
             })
         }
 
@@ -236,9 +243,14 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
     getServerTime() {
         return new Promise((resolve, reject) => {
             let timeoutId
+            const messageId = this.#messageBroker.generateMessageId()
 
             const messageHandler = ({ data }) => {
-                if (data?.type === MODULE_NAME.PLATFORM && data.action === ACTION_NAME_QA.GET_SERVER_TIME) {
+                if (
+                    data?.type === MODULE_NAME.PLATFORM
+                    && data.action === ACTION_NAME_QA.GET_SERVER_TIME
+                    && data.id === messageId
+                ) {
                     if (!data.time) {
                         reject(new Error('Invalid server time'))
                         return
@@ -254,6 +266,7 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
             this.#messageBroker.send({
                 type: MODULE_NAME.PLATFORM,
                 action: ACTION_NAME_QA.GET_SERVER_TIME,
+                id: messageId,
             })
 
             timeoutId = setTimeout(() => {
@@ -294,9 +307,15 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
 
     getDataFromStorage(key, storageType, tryParseJson) {
         if (storageType === STORAGE_TYPE.PLATFORM_INTERNAL) {
+            const messageId = this.#messageBroker.generateMessageId()
+
             return new Promise((resolve) => {
                 const messageHandler = ({ data }) => {
-                    if (data?.type === MODULE_NAME.STORAGE && data.action === ACTION_NAME_QA.GET_DATA_FROM_STORAGE) {
+                    if (
+                        data?.type === MODULE_NAME.STORAGE
+                        && data.action === ACTION_NAME_QA.GET_DATA_FROM_STORAGE
+                        && data.id === messageId
+                    ) {
                         const values = Object.values(data.storage)
                         resolve(values)
                         this.#messageBroker.removeListener(messageHandler)
@@ -308,6 +327,7 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
                 this.#messageBroker.send({
                     type: MODULE_NAME.STORAGE,
                     action: ACTION_NAME_QA.GET_DATA_FROM_STORAGE,
+                    id: messageId,
                     options: { key, storageType, tryParseJson },
                 })
             })
@@ -562,8 +582,14 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
         if (!promiseDecorator) {
             promiseDecorator = this._createPromiseDecorator(ACTION_NAME.PURCHASE)
 
+            const messageId = this.#messageBroker.generateMessageId()
+
             const messageHandler = ({ data }) => {
-                if (data?.type === MODULE_NAME.PAYMENTS && data.action === ACTION_NAME.PURCHASE) {
+                if (
+                    data?.type === MODULE_NAME.PAYMENTS
+                    && data.action === ACTION_NAME.PURCHASE
+                    && data.id === messageId
+                ) {
                     if (!data.purchase || typeof data.purchase !== 'object') {
                         this._rejectPromiseDecorator(ACTION_NAME.PURCHASE, new Error('Invalid purchase'))
                         return
@@ -579,6 +605,7 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
             this.#messageBroker.send({
                 type: MODULE_NAME.PAYMENTS,
                 action: ACTION_NAME.PURCHASE,
+                id: messageId,
             })
         }
 
@@ -590,8 +617,14 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
         if (!promiseDecorator) {
             promiseDecorator = this._createPromiseDecorator(ACTION_NAME.GET_PURCHASES)
 
+            const messageId = this.#messageBroker.generateMessageId()
+
             const messageHandler = ({ data }) => {
-                if (data?.type === MODULE_NAME.PAYMENTS && data.action === ACTION_NAME.GET_PURCHASES) {
+                if (
+                    data?.type === MODULE_NAME.PAYMENTS
+                    && data.action === ACTION_NAME.GET_PURCHASES
+                    && data.id === messageId
+                ) {
                     this._resolvePromiseDecorator(ACTION_NAME.GET_PURCHASES, data.purchases)
                     this.#messageBroker.removeListener(messageHandler)
                 }
@@ -602,6 +635,7 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
             this.#messageBroker.send({
                 type: MODULE_NAME.PAYMENTS,
                 action: ACTION_NAME.GET_PURCHASES,
+                id: messageId,
             })
         }
 
@@ -613,8 +647,14 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
         if (!promiseDecorator) {
             promiseDecorator = this._createPromiseDecorator(ACTION_NAME.GET_CATALOG)
 
+            const messageId = this.#messageBroker.generateMessageId()
+
             const messageHandler = ({ data }) => {
-                if (data?.type === MODULE_NAME.PAYMENTS && data.action === ACTION_NAME.GET_CATALOG) {
+                if (
+                    data?.type === MODULE_NAME.PAYMENTS
+                    && data.action === ACTION_NAME.GET_CATALOG
+                    && data.id === messageId
+                ) {
                     this._resolvePromiseDecorator(ACTION_NAME.GET_CATALOG, data.catalog)
                     this.#messageBroker.removeListener(messageHandler)
                 }
@@ -625,6 +665,7 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
             this.#messageBroker.send({
                 type: MODULE_NAME.PAYMENTS,
                 action: ACTION_NAME.GET_CATALOG,
+                id: messageId,
             })
         }
 
@@ -636,8 +677,14 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
         if (!promiseDecorator) {
             promiseDecorator = this._createPromiseDecorator(ACTION_NAME.CONSUME_PURCHASE)
 
+            const messageId = this.#messageBroker.generateMessageId()
+
             const messageHandler = ({ data }) => {
-                if (data?.type === MODULE_NAME.PAYMENTS && data.action === ACTION_NAME.CONSUME_PURCHASE) {
+                if (
+                    data?.type === MODULE_NAME.PAYMENTS
+                    && data.action === ACTION_NAME.CONSUME_PURCHASE
+                    && data.id === messageId
+                ) {
                     this._resolvePromiseDecorator(ACTION_NAME.CONSUME_PURCHASE, data.result)
                     this.#messageBroker.removeListener(messageHandler)
                 }
@@ -648,6 +695,7 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
             this.#messageBroker.send({
                 type: MODULE_NAME.PAYMENTS,
                 action: ACTION_NAME.CONSUME_PURCHASE,
+                id: messageId,
             })
         }
         return promiseDecorator.promise
@@ -659,8 +707,14 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
         if (!promiseDecorator) {
             promiseDecorator = this._createPromiseDecorator(ACTION_NAME.GET_REMOTE_CONFIG)
 
+            const messageId = this.#messageBroker.generateMessageId()
+
             const messageHandler = ({ data }) => {
-                if (data?.type === MODULE_NAME.REMOTE_CONFIG && data.action === ACTION_NAME.GET_REMOTE_CONFIG) {
+                if (
+                    data?.type === MODULE_NAME.REMOTE_CONFIG
+                    && data.action === ACTION_NAME.GET_REMOTE_CONFIG
+                    && data.id === messageId
+                ) {
                     this._resolvePromiseDecorator(ACTION_NAME.GET_REMOTE_CONFIG, data.result)
                     this.#messageBroker.removeListener(messageHandler)
                 }
@@ -671,6 +725,7 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
             this.#messageBroker.send({
                 type: MODULE_NAME.REMOTE_CONFIG,
                 action: ACTION_NAME.GET_REMOTE_CONFIG,
+                id: messageId,
             })
         }
 
@@ -684,8 +739,14 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
         if (!promiseDecorator) {
             promiseDecorator = this._createPromiseDecorator(ACTION_NAME.CLIPBOARD_WRITE)
 
+            const messageId = this.#messageBroker.generateMessageId()
+
             const messageHandler = ({ data }) => {
-                if (data?.type === MODULE_NAME.CLIPBOARD && data.action === ACTION_NAME.CLIPBOARD_WRITE) {
+                if (
+                    data?.type === MODULE_NAME.CLIPBOARD
+                    && data.action === ACTION_NAME.CLIPBOARD_WRITE
+                    && data.id === messageId
+                ) {
                     this._resolvePromiseDecorator(ACTION_NAME.CLIPBOARD_WRITE, true)
                     this.#messageBroker.removeListener(messageHandler)
                 }
@@ -696,6 +757,7 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
             this.#messageBroker.send({
                 type: MODULE_NAME.CLIPBOARD,
                 action: ACTION_NAME.CLIPBOARD_WRITE,
+                id: messageId,
                 options: { text },
             })
         }
@@ -708,8 +770,14 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
         if (!promiseDecorator) {
             promiseDecorator = this._createPromiseDecorator(ACTION_NAME_QA.CLIPBOARD_READ)
 
+            const messageId = this.#messageBroker.generateMessageId()
+
             const messageHandler = ({ data }) => {
-                if (data?.type === MODULE_NAME.CLIPBOARD && data.action === ACTION_NAME_QA.CLIPBOARD_READ) {
+                if (
+                    data?.type === MODULE_NAME.CLIPBOARD
+                    && data.action === ACTION_NAME_QA.CLIPBOARD_READ
+                    && data.id === messageId
+                ) {
                     const { text } = data
                     this._resolvePromiseDecorator(ACTION_NAME_QA.CLIPBOARD_READ, text)
                     this.#messageBroker.removeListener(messageHandler)
@@ -721,6 +789,7 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
             this.#messageBroker.send({
                 type: MODULE_NAME.CLIPBOARD,
                 action: ACTION_NAME_QA.CLIPBOARD_READ,
+                id: messageId,
                 options: {},
             })
         }
@@ -752,13 +821,23 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
     }
 
     getLeaderboardScore(options) {
-        let promiseDecorator = this._getPromiseDecorator(ACTION_NAME.GET_LEADERBOARD_SCORE)
+        const leaderboardName = options?.yandex?.leaderboardName
+        const decoratorKey = `${ACTION_NAME.GET_LEADERBOARD_SCORE}_${leaderboardName}`
+
+        let promiseDecorator = this._getPromiseDecorator(decoratorKey)
         if (!promiseDecorator) {
-            promiseDecorator = this._createPromiseDecorator(ACTION_NAME.GET_LEADERBOARD_SCORE)
+            promiseDecorator = this._createPromiseDecorator(decoratorKey)
+
+            const messageId = this.#messageBroker.generateMessageId()
 
             const messageHandler = ({ data }) => {
-                if (data?.type === MODULE_NAME.LEADERBOARD && data.action === ACTION_NAME.GET_LEADERBOARD_SCORE) {
-                    this._resolvePromiseDecorator(ACTION_NAME.GET_LEADERBOARD_SCORE, data.score)
+                if (
+                    data?.type === MODULE_NAME.LEADERBOARD
+                    && data.action === ACTION_NAME.GET_LEADERBOARD_SCORE
+                    && data.id === messageId
+                    && data.leaderboardName === leaderboardName
+                ) {
+                    this._resolvePromiseDecorator(decoratorKey, data.score)
                     this.#messageBroker.removeListener(messageHandler)
                 }
             }
@@ -768,6 +847,8 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
             this.#messageBroker.send({
                 type: MODULE_NAME.LEADERBOARD,
                 action: ACTION_NAME.GET_LEADERBOARD_SCORE,
+                id: messageId,
+                leaderboardName,
                 options,
             })
         }
@@ -780,10 +861,13 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
         if (!promiseDecorator) {
             promiseDecorator = this._createPromiseDecorator(ACTION_NAME.GET_LEADERBOARD_ENTRIES)
 
+            const messageId = this.#messageBroker.generateMessageId()
+
             const messageHandler = (event) => {
                 if (
                     event.data?.type === MODULE_NAME.LEADERBOARD
                     && event.data.action === ACTION_NAME.GET_LEADERBOARD_ENTRIES
+                    && event.data.id === messageId
                 ) {
                     this._resolvePromiseDecorator(ACTION_NAME.GET_LEADERBOARD_ENTRIES, event.data.entries)
                     this.#messageBroker.removeListener(messageHandler)
@@ -795,6 +879,7 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
             this.#messageBroker.send({
                 type: MODULE_NAME.LEADERBOARD,
                 action: ACTION_NAME.GET_LEADERBOARD_ENTRIES,
+                id: messageId,
                 options,
             })
         }
