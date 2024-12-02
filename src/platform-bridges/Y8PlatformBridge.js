@@ -42,6 +42,19 @@ class Y8PlatformBridge extends PlatformBridgeBase {
         return true
     }
 
+    // achievements
+    get isAchievementsSupported() {
+        return true
+    }
+
+    get isGetAchievementsListSupported() {
+        return true
+    }
+
+    get isAchievementsNativePopupSupported() {
+        return true
+    }
+
     initialize() {
         if (this._isInitialized) {
             return Promise.resolve()
@@ -260,6 +273,47 @@ class Y8PlatformBridge extends PlatformBridgeBase {
                 }
             },
         })
+    }
+
+    // achievements
+    unlockAchievement(options) {
+        if (!this._isPlayerAuthorized) {
+            return Promise.reject()
+        }
+
+        if (!options.achievement || !options.achievementkey) {
+            return Promise.reject()
+        }
+
+        return new Promise((resolve) => {
+            this._platformSdk.GameAPI.Achievements.save(options, (data) => {
+                resolve(data)
+            })
+        })
+    }
+
+    getAchievementsList(options) {
+        return new Promise((resolve, reject) => {
+            this._platformSdk.GameAPI.Achievements.listCustom(options, (data) => {
+                if (data.success) {
+                    resolve(data.achievements.map(({ player, ...achievement }) => ({
+                        ...achievement,
+                        playerid: player.playerid,
+                        playername: player.playername,
+                        lastupdated: player.lastupdated,
+                        date: player.date,
+                        rdate: player.rdate,
+                    })))
+                } else {
+                    reject(new Error(data.errorcode))
+                }
+            })
+        })
+    }
+
+    showAchievementsNativePopup(options) {
+        this._platformSdk.GameAPI.Achievements.list(options)
+        return Promise.resolve()
     }
 
     #getUserDataFromStorage() {
