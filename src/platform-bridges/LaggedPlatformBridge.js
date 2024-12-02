@@ -42,6 +42,11 @@ class LaggedPlatformBridge extends PlatformBridgeBase {
         return true
     }
 
+    // achievements
+    get isAchievementsSupported() {
+        return true
+    }
+
     initialize() {
         if (this._isInitialized) {
             return Promise.resolve()
@@ -167,6 +172,28 @@ class LaggedPlatformBridge extends PlatformBridgeBase {
         }
 
         return promiseDecorator.promise
+    }
+
+    // achievements
+    unlockAchievement(options) {
+        if (!options.achievement) {
+            return Promise.reject()
+        }
+
+        return new Promise((resolve, reject) => {
+            this._platformSdk.Achievements.save(
+                Array.isArray(options.achievement)
+                    ? options.achievement
+                    : [options.achievement],
+                (response) => {
+                    if (response.success) {
+                        resolve(response)
+                    } else {
+                        reject(response.errormsg)
+                    }
+                },
+            )
+        })
     }
 }
 
