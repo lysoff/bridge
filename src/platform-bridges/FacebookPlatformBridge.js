@@ -24,7 +24,6 @@ import {
     REWARDED_STATE,
     BANNER_STATE,
     STORAGE_TYPE,
-    ERROR,
     DEVICE_TYPE,
     PLATFORM_MESSAGE,
 } from '../constants'
