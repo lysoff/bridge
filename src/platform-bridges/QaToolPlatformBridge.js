@@ -821,7 +821,8 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
     }
 
     getLeaderboardScore(options) {
-        const leaderboardName = options?.yandex?.leaderboardName
+        const platformData = Object.values(options || {}).find((platform) => platform?.leaderboardName)
+        const leaderboardName = platformData?.leaderboardName
         const decoratorKey = `${ACTION_NAME.GET_LEADERBOARD_SCORE}_${leaderboardName}`
 
         let promiseDecorator = this._getPromiseDecorator(decoratorKey)
