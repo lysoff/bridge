@@ -40,6 +40,7 @@ import LeaderboardModule from './modules/LeaderboardModule'
 import PaymentsModule from './modules/PaymentsModule'
 import RemoteConfigModule from './modules/RemoteConfigModule'
 import ClipboardModule from './modules/ClipboardModule'
+import AchievementsModule from './modules/AchievementsModule'
 
 import PlatformBridgeBase from './platform-bridges/PlatformBridgeBase'
 import VkPlatformBridge from './platform-bridges/VkPlatformBridge'
@@ -100,6 +101,10 @@ class PlaygamaBridge {
 
     get payments() {
         return this.#getModule(MODULE_NAME.PAYMENTS)
+    }
+
+    get achievements() {
+        return this.#getModule(MODULE_NAME.ACHIEVEMENTS)
     }
 
     get remoteConfig() {
@@ -181,6 +186,7 @@ class PlaygamaBridge {
                     this.#modules[MODULE_NAME.PAYMENTS] = new PaymentsModule(this.#platformBridge)
                     this.#modules[MODULE_NAME.REMOTE_CONFIG] = new RemoteConfigModule(this.#platformBridge)
                     this.#modules[MODULE_NAME.CLIPBOARD] = new ClipboardModule(this.#platformBridge)
+                    this.#modules[MODULE_NAME.ACHIEVEMENTS] = new AchievementsModule(this.#platformBridge)
 
                     this.#isInitialized = true
                     console.info(`%c PlaygamaBridge v.${this.version} initialized. `, 'background: #01A5DA; color: white')

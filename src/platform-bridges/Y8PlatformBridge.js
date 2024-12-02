@@ -29,6 +29,7 @@ import {
 const SDK_URL = 'https://cdn.y8.com/api/sdk.js'
 const USERDATA_KEY = 'userData'
 const NOT_FOUND_ERROR = 'Key not found'
+const ADS_ID = '6129580795478709'
 
 class Y8PlatformBridge extends PlatformBridgeBase {
     // platform
@@ -66,6 +67,19 @@ class Y8PlatformBridge extends PlatformBridgeBase {
         return true
     }
 
+    // achievements
+    get isAchievementsSupported() {
+        return true
+    }
+
+    get isGetAchievementsListSupported() {
+        return true
+    }
+
+    get isAchievementsNativePopupSupported() {
+        return true
+    }
+
     initialize() {
         if (this._isInitialized) {
             return Promise.resolve()
@@ -75,7 +89,7 @@ class Y8PlatformBridge extends PlatformBridgeBase {
         if (!promiseDecorator) {
             promiseDecorator = this._createPromiseDecorator(ACTION_NAME.INITIALIZE)
 
-            if (!this._options?.gameId || !this._options?.adsenseId || !this._options?.hostId) {
+            if (!this._options?.gameId) {
                 this._rejectPromiseDecorator(ACTION_NAME.INITIALIZE, ERROR.Y8_GAME_PARAMS_NOT_FOUND)
             } else {
                 addJavaScript(SDK_URL).then(() => {
@@ -84,8 +98,11 @@ class Y8PlatformBridge extends PlatformBridgeBase {
 
                         this._platformSdk.Event.subscribe('id.init', (() => {
                             addAdsByGoogle({
-                                hostId: this._options.hostId,
-                                adsenseId: this._options.adsenseId,
+                                hostId: `ca-host-pub-${ADS_ID}`,
+                                adsenseId: this._options.channelId
+                                    ? `ca-pub-${ADS_ID}`
+                                    : this._options.adsenseId,
+                                channelId: this._options.channelId,
                             }).then(() => {
                                 this._showAd = (o) => { window.adsbygoogle.push(o) }
 
@@ -373,6 +390,47 @@ class Y8PlatformBridge extends PlatformBridgeBase {
         }
 
         return promiseDecorator.promise
+    }
+
+    // achievements
+    unlockAchievement(options) {
+        if (!this._isPlayerAuthorized) {
+            return Promise.reject()
+        }
+
+        if (!options.achievement || !options.achievementkey) {
+            return Promise.reject()
+        }
+
+        return new Promise((resolve) => {
+            this._platformSdk.GameAPI.Achievements.save(options, (data) => {
+                resolve(data)
+            })
+        })
+    }
+
+    getAchievementsList(options) {
+        return new Promise((resolve, reject) => {
+            this._platformSdk.GameAPI.Achievements.listCustom(options, (data) => {
+                if (data.success) {
+                    resolve(data.achievements.map(({ player, ...achievement }) => ({
+                        ...achievement,
+                        playerid: player.playerid,
+                        playername: player.playername,
+                        lastupdated: player.lastupdated,
+                        date: player.date,
+                        rdate: player.rdate,
+                    })))
+                } else {
+                    reject(new Error(data.errorcode))
+                }
+            })
+        })
+    }
+
+    showAchievementsNativePopup(options) {
+        this._platformSdk.GameAPI.Achievements.list(options)
+        return Promise.resolve()
     }
 
     #getUserDataFromStorage() {

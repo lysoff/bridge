@@ -29,4 +29,8 @@ export default class MessageBroker {
     removeListener(callback) {
         window.removeEventListener('message', callback)
     }
+
+    generateMessageId() {
+        return `${Date.now()}-${Math.random()}`
+    }
 }
