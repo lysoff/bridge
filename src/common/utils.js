@@ -31,9 +31,9 @@ export const addAdsByGoogle = ({
     script.setAttribute('data-ad-client', adsenseId)
 
     if (channelId) {
-        script.setAttribute('data-ad-channel', hostId)
+        script.setAttribute('data-ad-channel', channelId)
     } else if (hostId) {
-        script.setAttribute('data-ad-host', channelId)
+        script.setAttribute('data-ad-host', hostId)
     }
 
     script.setAttribute('data-ad-frequency-hint', '30s')
