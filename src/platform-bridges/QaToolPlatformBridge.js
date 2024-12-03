@@ -63,6 +63,32 @@ const REWARD_STATUS = {
     CLOSE: 'close',
 }
 
+const SUPPORTED_FEATURES = {
+    PLAYER_AUTHORIZATION: 'isPlayerAuthorizationSupported',
+    PAYMENTS: 'isPaymentsSupported',
+    GET_CATALOG: 'isGetCatalogSupported',
+    GET_PURCHASES: 'isGetPurchasesSupported',
+    CONSUME_PURCHASE: 'isConsumePurchaseSupported',
+    REMOTE_CONFIG: 'isRemoteConfigSupported',
+    INVITE_FRIENDS: 'isInviteFriendsSupported',
+    JOIN_COMMUNITY: 'isJoinCommunitySupported',
+    SHARE: 'isShareSupported',
+    CREATE_POST: 'isCreatePostSupported',
+    ADD_TO_HOME_SCREEN: 'isAddToHomeScreenSupported',
+    ADD_TO_FAVORITES: 'isAddToFavoritesSupported',
+    RATE: 'isRateSupported',
+    LEADERBOARD: 'isLeaderboardSupported',
+    LEADERBOARD_MULTIPLE_BOARDS: 'isLeaderboardMultipleBoardsSupported',
+    LEADERBOARD_SET_SCORE: 'isLeaderboardSetScoreSupported',
+    LEADERBOARD_GET_SCORE: 'isLeaderboardGetScoreSupported',
+    LEADERBOARD_GET_ENTRIES: 'isLeaderboardGetEntriesSupported',
+    LEADERBOARD_NATIVE_POPUP: 'isLeaderboardNativePopupSupported',
+    STORAGE_INTERNAL: 'isStorageInternalSupported',
+    STORAGE_LOCAL: 'isStorageLocalSupported',
+    BANNER: 'isBannerSupported',
+    CLIPBOARD: 'isClipboardSupported',
+}
+
 class QaToolPlatformBridge extends PlatformBridgeBase {
     get platformId() {
         return PLATFORM_ID.QA_TOOL
@@ -70,104 +96,125 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
 
     // player
     get isPlayerAuthorizationSupported() {
-        return true
+        return this._supportedFeatures.includes(SUPPORTED_FEATURES.PLAYER_AUTHORIZATION)
     }
 
     // payments
     get isPaymentsSupported() {
-        return true
+        return this._supportedFeatures.includes(SUPPORTED_FEATURES.PAYMENTS)
     }
 
     get isGetCatalogSupported() {
-        return true
+        return this._supportedFeatures.includes(SUPPORTED_FEATURES.GET_CATALOG)
     }
 
     get isGetPurchasesSupported() {
-        return true
+        return this._supportedFeatures.includes(SUPPORTED_FEATURES.GET_PURCHASES)
     }
 
     get isConsumePurchaseSupported() {
-        return true
+        return this._supportedFeatures.includes(SUPPORTED_FEATURES.CONSUME_PURCHASE)
     }
 
     // config
     get isRemoteConfigSupported() {
-        return true
+        return this._supportedFeatures.includes(SUPPORTED_FEATURES.REMOTE_CONFIG)
     }
 
     // social
     get isInviteFriendsSupported() {
-        return true
+        return this._supportedFeatures.includes(SUPPORTED_FEATURES.INVITE_FRIENDS)
     }
 
     get isJoinCommunitySupported() {
-        return true
+        return this._supportedFeatures.includes(SUPPORTED_FEATURES.JOIN_COMMUNITY)
     }
 
     get isShareSupported() {
-        return true
+        return this._supportedFeatures.includes(SUPPORTED_FEATURES.SHARE)
     }
 
     get isCreatePostSupported() {
-        return true
+        return this._supportedFeatures.includes(SUPPORTED_FEATURES.CREATE_POST)
     }
 
     get isAddToHomeScreenSupported() {
-        return true
+        return this._supportedFeatures.includes(SUPPORTED_FEATURES.ADD_TO_HOME_SCREEN)
     }
 
     get isAddToFavoritesSupported() {
-        return true
+        return this._supportedFeatures.includes(SUPPORTED_FEATURES.ADD_TO_FAVORITES)
     }
 
     get isRateSupported() {
-        return true
+        return this._supportedFeatures.includes(SUPPORTED_FEATURES.RATE)
     }
 
     // leaderboard
     get isLeaderboardSupported() {
-        return true
+        return this._supportedFeatures.includes(SUPPORTED_FEATURES.LEADERBOARD)
     }
 
     get isLeaderboardMultipleBoardsSupported() {
-        return true
+        return this._supportedFeatures.includes(SUPPORTED_FEATURES.LEADERBOARD_MULTIPLE_BOARDS)
     }
 
     get isLeaderboardSetScoreSupported() {
-        return true
+        return this._supportedFeatures.includes(SUPPORTED_FEATURES.LEADERBOARD_SET_SCORE)
     }
 
     get isLeaderboardGetScoreSupported() {
-        return true
+        return this._supportedFeatures.includes(SUPPORTED_FEATURES.LEADERBOARD_GET_SCORE)
     }
 
     get isLeaderboardGetEntriesSupported() {
-        return true
+        return this._supportedFeatures.includes(SUPPORTED_FEATURES.LEADERBOARD_GET_ENTRIES)
     }
 
     get isLeaderboardNativePopupSupported() {
-        return true
+        return this._supportedFeatures.includes(SUPPORTED_FEATURES.LEADERBOARD_NATIVE_POPUP)
+    }
+
+    // clipboard
+    get isClipboardSupported() {
+        return this._supportedFeatures.includes(SUPPORTED_FEATURES.CLIPBOARD)
     }
 
     #messageBroker = new MessageBroker()
+
+    _supportedFeatures = []
 
     initialize() {
         if (this._isInitialized) {
             return Promise.resolve()
         }
+
         let promiseDecorator = this._getPromiseDecorator(ACTION_NAME.INITIALIZE)
         if (!promiseDecorator) {
             promiseDecorator = this._createPromiseDecorator(ACTION_NAME.INITIALIZE)
 
             this._defaultStorageType = STORAGE_TYPE.PLATFORM_INTERNAL
-            this._isInitialized = true
-            this._isBannerSupported = true
-            this._resolvePromiseDecorator(ACTION_NAME.INITIALIZE)
 
+            const messageHandler = ({ data }) => {
+                if (data?.type === MODULE_NAME.PLATFORM && data.action === ACTION_NAME.INITIALIZE) {
+                    this._supportedFeatures = data.supportedFeatures
+                    this._isBannerSupported = this._supportedFeatures.includes(SUPPORTED_FEATURES.BANNER)
+
+                    this._isInitialized = true
+                    this._resolvePromiseDecorator(ACTION_NAME.INITIALIZE)
+
+                    this.#messageBroker.send({
+                        type: MODULE_NAME_QA.LIVENESS,
+                        action: ACTION_NAME_QA.LIVENESS_PING,
+                        options: { version: PLUGIN_VERSION },
+                    })
+                }
+            }
+
+            this.#messageBroker.addListener(messageHandler)
             this.#messageBroker.send({
-                type: MODULE_NAME_QA.LIVENESS,
-                action: ACTION_NAME_QA.LIVENESS_PING,
-                options: { version: PLUGIN_VERSION },
+                type: MODULE_NAME.PLATFORM,
+                action: ACTION_NAME.INITIALIZE,
             })
         }
 
@@ -284,11 +331,21 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
             options: { storageType },
         })
 
-        if (storageType === STORAGE_TYPE.PLATFORM_INTERNAL) {
+        if (
+            storageType === STORAGE_TYPE.PLATFORM_INTERNAL
+            && this._supportedFeatures.includes(SUPPORTED_FEATURES.STORAGE_INTERNAL)
+        ) {
             return true
         }
 
-        return super.isStorageSupported(storageType)
+        if (
+            storageType === STORAGE_TYPE.LOCAL_STORAGE
+            && this._supportedFeatures.includes(SUPPORTED_FEATURES.STORAGE_LOCAL)
+        ) {
+            return true
+        }
+
+        return false
     }
 
     isStorageAvailable(storageType) {
@@ -298,11 +355,21 @@ class QaToolPlatformBridge extends PlatformBridgeBase {
             options: { storageType },
         })
 
-        if (storageType === STORAGE_TYPE.PLATFORM_INTERNAL) {
+        if (
+            storageType === STORAGE_TYPE.PLATFORM_INTERNAL
+            && this._supportedFeatures.includes(SUPPORTED_FEATURES.STORAGE_INTERNAL)
+        ) {
             return true
         }
 
-        return super.isStorageAvailable(storageType)
+        if (
+            storageType === STORAGE_TYPE.LOCAL_STORAGE
+            && this._supportedFeatures.includes(SUPPORTED_FEATURES.STORAGE_LOCAL)
+        ) {
+            return true
+        }
+
+        return false
     }
 
     getDataFromStorage(key, storageType, tryParseJson) {
