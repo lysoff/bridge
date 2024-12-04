@@ -40,6 +40,7 @@ import LeaderboardModule from './modules/LeaderboardModule'
 import PaymentsModule from './modules/PaymentsModule'
 import RemoteConfigModule from './modules/RemoteConfigModule'
 import ClipboardModule from './modules/ClipboardModule'
+import AchievementsModule from './modules/AchievementsModule'
 
 import PlatformBridgeBase from './platform-bridges/PlatformBridgeBase'
 import VkPlatformBridge from './platform-bridges/VkPlatformBridge'
@@ -47,7 +48,6 @@ import YandexPlatformBridge from './platform-bridges/YandexPlatformBridge'
 import CrazyGamesPlatformBridge from './platform-bridges/CrazyGamesPlatformBridge'
 import AbsoluteGamesPlatformBridge from './platform-bridges/AbsoluteGamesPlatformBridge'
 import GameDistributionPlatformBridge from './platform-bridges/GameDistributionPlatformBridge'
-import VkPlayPlatformBridge from './platform-bridges/VkPlayPlatformBridge'
 import OkPlatformBridge from './platform-bridges/OkPlatformBridge'
 import PlaygamaPlatformBridge from './platform-bridges/PlaygamaPlatformBridge'
 import PlayDeckPlatformBridge from './platform-bridges/PlayDeckPlatformBridge'
@@ -101,6 +101,10 @@ class PlaygamaBridge {
 
     get payments() {
         return this.#getModule(MODULE_NAME.PAYMENTS)
+    }
+
+    get achievements() {
+        return this.#getModule(MODULE_NAME.ACHIEVEMENTS)
     }
 
     get remoteConfig() {
@@ -182,6 +186,7 @@ class PlaygamaBridge {
                     this.#modules[MODULE_NAME.PAYMENTS] = new PaymentsModule(this.#platformBridge)
                     this.#modules[MODULE_NAME.REMOTE_CONFIG] = new RemoteConfigModule(this.#platformBridge)
                     this.#modules[MODULE_NAME.CLIPBOARD] = new ClipboardModule(this.#platformBridge)
+                    this.#modules[MODULE_NAME.ACHIEVEMENTS] = new AchievementsModule(this.#platformBridge)
 
                     this.#isInitialized = true
                     console.info(`%c PlaygamaBridge v.${this.version} initialized. `, 'background: #01A5DA; color: white')
@@ -246,10 +251,6 @@ class PlaygamaBridge {
         switch (platformId) {
             case PLATFORM_ID.VK: {
                 this.#platformBridge = new VkPlatformBridge(_options)
-                break
-            }
-            case PLATFORM_ID.VK_PLAY: {
-                this.#platformBridge = new VkPlayPlatformBridge(_options)
                 break
             }
             case PLATFORM_ID.YANDEX: {

@@ -17,7 +17,6 @@
 
 export const PLATFORM_ID = {
     VK: 'vk',
-    VK_PLAY: 'vk_play',
     OK: 'ok',
     YANDEX: 'yandex',
     CRAZY_GAMES: 'crazy_games',
@@ -46,6 +45,7 @@ export const MODULE_NAME = {
     PAYMENTS: 'payments',
     REMOTE_CONFIG: 'remote_config',
     CLIPBOARD: 'clipboard',
+    ACHIEVEMENTS: 'achievements',
 }
 
 export const EVENT_NAME = {
@@ -133,8 +133,7 @@ export const ERROR = {
     STORAGE_NOT_SUPPORTED: { message: 'Storage not supported' },
     STORAGE_NOT_AVAILABLE: { message: 'Storage not available' },
     GAME_DISTRIBUTION_GAME_ID_IS_UNDEFINED: { message: 'GameDistribution Game ID is undefined' },
-    VK_PLAY_GAME_ID_IS_UNDEFINED: { message: 'VK Play Game ID is undefined' },
-    Y8_GAME_ID_IS_UNDEFINED: { message: 'Y8 Game ID is undefined' },
+    Y8_GAME_PARAMS_NOT_FOUND: { message: 'Y8 Game params are not found' },
     OK_GAME_PARAMS_NOT_FOUND: { message: 'OK Game params are not found' },
     LAGGED_GAME_PARAMS_NOT_FOUND: { message: 'Lagged Game params are not found' },
     FACEBOOK_PLACEMENT_ID_IS_UNDEFINED: { message: 'Facebook Placement ID is undefined' },

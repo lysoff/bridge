@@ -16,7 +16,7 @@
  */
 
 import PlatformBridgeBase from './PlatformBridgeBase'
-import { addJavaScript, waitFor } from '../common/utils'
+import { addAdsByGoogle, addJavaScript, waitFor } from '../common/utils'
 import {
     PLATFORM_ID,
     ACTION_NAME,
@@ -29,6 +29,7 @@ import {
 const SDK_URL = 'https://cdn.y8.com/api/sdk.js'
 const USERDATA_KEY = 'userData'
 const NOT_FOUND_ERROR = 'Key not found'
+const ADS_ID = '6129580795478709'
 
 class Y8PlatformBridge extends PlatformBridgeBase {
     // platform
@@ -41,6 +42,44 @@ class Y8PlatformBridge extends PlatformBridgeBase {
         return true
     }
 
+    // leaderboard
+    get isLeaderboardSupported() {
+        return true
+    }
+
+    get isLeaderboardNativePopupSupported() {
+        return true
+    }
+
+    get isLeaderboardMultipleBoardsSupported() {
+        return true
+    }
+
+    get isLeaderboardSetScoreSupported() {
+        return true
+    }
+
+    get isLeaderboardGetScoreSupported() {
+        return true
+    }
+
+    get isLeaderboardGetEntriesSupported() {
+        return true
+    }
+
+    // achievements
+    get isAchievementsSupported() {
+        return true
+    }
+
+    get isGetAchievementsListSupported() {
+        return true
+    }
+
+    get isAchievementsNativePopupSupported() {
+        return true
+    }
+
     initialize() {
         if (this._isInitialized) {
             return Promise.resolve()
@@ -50,15 +89,29 @@ class Y8PlatformBridge extends PlatformBridgeBase {
         if (!promiseDecorator) {
             promiseDecorator = this._createPromiseDecorator(ACTION_NAME.INITIALIZE)
 
-            if (!this._options || !this._options.gameId) {
-                this._rejectPromiseDecorator(ACTION_NAME.INITIALIZE, ERROR.Y8_GAME_ID_IS_UNDEFINED)
+            if (!this._options?.gameId) {
+                this._rejectPromiseDecorator(ACTION_NAME.INITIALIZE, ERROR.Y8_GAME_PARAMS_NOT_FOUND)
             } else {
                 addJavaScript(SDK_URL).then(() => {
                     waitFor('ID').then(() => {
                         this._platformSdk = window.ID
 
                         this._platformSdk.Event.subscribe('id.init', (() => {
-                            this._platformSdk.ads.init(this._options.gameId)
+                            addAdsByGoogle({
+                                hostId: `ca-host-pub-${ADS_ID}`,
+                                adsenseId: this._options.channelId
+                                    ? `ca-pub-${ADS_ID}`
+                                    : this._options.adsenseId,
+                                channelId: this._options.channelId,
+                            }).then(() => {
+                                this._showAd = (o) => { window.adsbygoogle.push(o) }
+
+                                window.adsbygoogle.push({
+                                    preloadAdBreaks: 'on',
+                                    sound: 'on',
+                                    onReady: () => {},
+                                })
+                            })
 
                             this._platformSdk.getLoginStatus((data) => {
                                 this.#updatePlayerInfo(data)
@@ -195,26 +248,189 @@ class Y8PlatformBridge extends PlatformBridgeBase {
 
     // advertisement
     showInterstitial() {
-        this._setInterstitialState(INTERSTITIAL_STATE.OPENED)
-        this._platformSdk.ads.display(() => {
-            if (!this._platformSdk.ads.strategy) {
-                this._setInterstitialState(INTERSTITIAL_STATE.FAILED)
-            } else {
-                this._setInterstitialState(INTERSTITIAL_STATE.CLOSED)
-            }
+        if (!this._showAd) {
+            this._setInterstitialState(INTERSTITIAL_STATE.FAILED)
+            return
+        }
+
+        this._showAd({
+            type: 'start',
+            name: 'start-game',
+            beforeAd: () => {
+                this._setInterstitialState(INTERSTITIAL_STATE.OPENED)
+            },
+            afterAd: () => {
+                if (this.interstitialState !== INTERSTITIAL_STATE.FAILED) {
+                    this._setInterstitialState(INTERSTITIAL_STATE.CLOSED)
+                }
+            },
+            adBreakDone: (placementInfo) => {
+                if (placementInfo.breakStatus !== 'viewed') {
+                    this._setInterstitialState(INTERSTITIAL_STATE.FAILED)
+                }
+            },
         })
     }
 
     showRewarded() {
-        this._setRewardedState(REWARDED_STATE.OPENED)
-        this._platformSdk.ads.display(() => {
-            if (!this._platformSdk.ads.strategy) {
-                this._setRewardedState(REWARDED_STATE.FAILED)
-            } else {
-                this._setRewardedState(REWARDED_STATE.REWARDED)
-                this._setRewardedState(REWARDED_STATE.CLOSED)
-            }
+        if (!this._showAd) {
+            this._setRewardedState(REWARDED_STATE.FAILED)
+            return
+        }
+
+        this._showAd({
+            type: 'reward',
+            name: 'rewarded Ad',
+            beforeAd: () => {
+                this._setRewardedState(REWARDED_STATE.OPENED)
+            },
+            afterAd: () => {
+                if (this.rewardedState !== REWARDED_STATE.FAILED) {
+                    this._setRewardedState(REWARDED_STATE.CLOSED)
+                }
+            },
+            beforeReward: (showAdFn) => { showAdFn(0) },
+            adDismissed: () => { this._setRewardedState(REWARDED_STATE.FAILED) },
+            adViewed: () => { this._setRewardedState(REWARDED_STATE.REWARDED) },
+            adBreakDone: (placementInfo) => {
+                if (placementInfo.breakStatus === 'frequencyCapped' || placementInfo.breakStatus === 'other') {
+                    this._setRewardedState(REWARDED_STATE.FAILED)
+                }
+            },
         })
+    }
+
+    // leaderboard
+    showLeaderboardNativePopup(options) {
+        if (!this._isPlayerAuthorized) {
+            return Promise.reject()
+        }
+
+        if (!options || !options.table) {
+            return Promise.reject(new Error('`table` property is not provided'))
+        }
+
+        this._platformSdk.GameAPI.Leaderboards.list(options)
+        return Promise.resolve()
+    }
+
+    setLeaderboardScore(options) {
+        if (!this._isPlayerAuthorized) {
+            return Promise.reject()
+        }
+
+        if (!options || !options.points || !options.table) {
+            return Promise.reject(new Error('`table` or `points` property is not provided'))
+        }
+
+        let promiseDecorator = this._getPromiseDecorator(ACTION_NAME.SET_LEADERBOARD_SCORE)
+        if (!promiseDecorator) {
+            promiseDecorator = this._createPromiseDecorator(ACTION_NAME.SET_LEADERBOARD_SCORE)
+
+            this._platformSdk.GameAPI.Leaderboards.save(options, ({ success, errormessage: error }) => {
+                if (success) {
+                    this._resolvePromiseDecorator(ACTION_NAME.SET_LEADERBOARD_SCORE)
+                } else {
+                    this._rejectPromiseDecorator(ACTION_NAME.SET_LEADERBOARD_SCORE, error)
+                }
+            })
+        }
+
+        return promiseDecorator.promise
+    }
+
+    getLeaderboardScore(options) {
+        if (!this._isPlayerAuthorized) {
+            return Promise.reject()
+        }
+
+        if (!options || !options.table) {
+            return Promise.reject(new Error('`table` property is not provided'))
+        }
+
+        let promiseDecorator = this._getPromiseDecorator(ACTION_NAME.GET_LEADERBOARD_SCORE)
+        if (!promiseDecorator) {
+            promiseDecorator = this._createPromiseDecorator(ACTION_NAME.GET_LEADERBOARD_SCORE)
+
+            this._platformSdk.GameAPI.Leaderboards.listCustom(
+                { ...options, playerid: this.playerId },
+                ({ scores, success, errormessage: error }) => {
+                    if (success) {
+                        this._resolvePromiseDecorator(ACTION_NAME.GET_LEADERBOARD_SCORE, scores[0])
+                    } else {
+                        this._rejectPromiseDecorator(ACTION_NAME.GET_LEADERBOARD_SCORE, error)
+                    }
+                },
+            )
+        }
+
+        return promiseDecorator.promise
+    }
+
+    getLeaderboardEntries(options) {
+        if (!this._isPlayerAuthorized) {
+            return Promise.reject()
+        }
+
+        if (!options || !options.table) {
+            return Promise.reject(new Error('`table` property is not provided'))
+        }
+
+        let promiseDecorator = this._getPromiseDecorator(ACTION_NAME.GET_LEADERBOARD_ENTRIES)
+        if (!promiseDecorator) {
+            promiseDecorator = this._createPromiseDecorator(ACTION_NAME.GET_LEADERBOARD_ENTRIES)
+
+            this._platformSdk.GameAPI.Leaderboards.listCustom(options, ({ scores, success, errormessage: error }) => {
+                if (success) {
+                    this._resolvePromiseDecorator(ACTION_NAME.GET_LEADERBOARD_ENTRIES, scores)
+                } else {
+                    this._rejectPromiseDecorator(ACTION_NAME.GET_LEADERBOARD_ENTRIES, error)
+                }
+            })
+        }
+
+        return promiseDecorator.promise
+    }
+
+    // achievements
+    unlockAchievement(options) {
+        if (!this._isPlayerAuthorized) {
+            return Promise.reject()
+        }
+
+        if (!options.achievement || !options.achievementkey) {
+            return Promise.reject()
+        }
+
+        return new Promise((resolve) => {
+            this._platformSdk.GameAPI.Achievements.save(options, (data) => {
+                resolve(data)
+            })
+        })
+    }
+
+    getAchievementsList(options) {
+        return new Promise((resolve, reject) => {
+            this._platformSdk.GameAPI.Achievements.listCustom(options, (data) => {
+                if (data.success) {
+                    resolve(data.achievements.map(({ player, ...achievement }) => ({
+                        ...achievement,
+                        playerid: player.playerid,
+                        playername: player.playername,
+                        lastupdated: player.lastupdated,
+                        date: player.date,
+                        rdate: player.rdate,
+                    })))
+                } else {
+                    reject(new Error(data.errorcode))
+                }
+            })
+        })
+    }
+
+    showAchievementsNativePopup(options) {
+        this._platformSdk.GameAPI.Achievements.list(options)
+        return Promise.resolve()
     }
 
     #getUserDataFromStorage() {

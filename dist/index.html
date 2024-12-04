@@ -223,6 +223,23 @@
                 <input type="text" id="payments-token-input" placeholder="Yandex Token">
                 <button id="payments-consume-button">Consume</button>
             </div>
+            <div class="section" id="achievements-section" style="display: none">
+                <h2>Achievements</h2>
+                <p>Is Supported: <span id="achievements-is-supported-text"></span></p>
+                <p>Is List Supported: <span id="achievements-is-get-list-supported-text"></span></p>
+                <p>Is Native Popup Supported: <span id="achievements-is-native-popup-supported-text"></span></p>
+                <hr>
+                <button id="achievements-get-list-button">Get List</button>
+                <pre id="achievements-list-container"></pre>
+                <button id="achievements-show-native-popup-button">Show Native Popup</button>
+                <hr>
+                <input type="text" id="achievements-id-input" placeholder="Achievement Id (key)">
+                <input type="text" id="achievements-name-input" placeholder="Achievement Name">
+                <button id="achievements-unlock-button">Unlock</button>
+                <br>
+                <pre id="achievements-unlock-status-container"></pre>
+                <br>
+            </div>
             <div class="section" id="remote-config-section" style="display: none">
                 <h2>Remote Config</h2>
                 <p>Is Supported: <span id="remote-config-is-supported-text"></span></p>
@@ -267,6 +284,7 @@
                 const socialSection = document.getElementById('social-section')
                 const leaderboardSection = document.getElementById('leaderboard-section')
                 const paymentsSection = document.getElementById('payments-section')
+                const achievementsSection = document.getElementById('achievements-section')
                 const remoteConfigSection = document.getElementById('remote-config-section')
                 const clipboardSection = document.getElementById('clipboard-section')
 
@@ -278,6 +296,7 @@
                 socialSection.style.display = 'none'
                 leaderboardSection.style.display = 'none'
                 paymentsSection.style.display = 'none'
+                achievementsSection.style.display = 'none'
                 remoteConfigSection.style.display = 'none'
                 clipboardSection.style.display = 'none'
 
@@ -375,6 +394,17 @@
                 const paymentsConsumeButton = document.getElementById('payments-consume-button')
                 const purchaseStatusContainer = document.getElementById('payments-purchase-status')
 
+                const achievementsIsSupportedText = document.getElementById('achievements-is-supported-text')
+                const achievementsIsGetListSupportedText = document.getElementById('achievements-is-get-list-supported-text')
+                const achievementsIsNativePopupSupportedText = document.getElementById('achievements-is-native-popup-supported-text')
+                const achievementsGetListButton = document.getElementById('achievements-get-list-button')
+                const achievementListContainer = document.getElementById('achievements-list-container')
+                const achievementsShowNativeButton = document.getElementById('achievements-show-native-popup-button')
+                const achievementsIdInput = document.getElementById('achievements-id-input')
+                const achievementsNameInput = document.getElementById('achievements-name-input')
+                const achievementsUnlockButton = document.getElementById('achievements-unlock-button')
+                const achievementsUnlockStatusContainer = document.getElementById('achievements-unlock-status-container')
+
                 const remoteConfigIsSupportedText = document.getElementById('remote-config-is-supported-text')
                 const remoteConfigButton = document.getElementById('get-remote-config-button')
                 const remoteConfigContainer = document.getElementById('remote-config-container')
@@ -393,14 +423,13 @@
                         'game_distribution': {
                             gameId: ''
                         },
-                        'vk_play': {
-                            gameId: ''
-                        },
                         'telegram': {
                             adsgramBlockId: ''
                         },
                         'y8': {
-                            gameId: ''
+                            gameId: '',
+                            adsenseId: '',
+                            channelId: '',
                         },
                         'lagged': {
                             devId: '',
@@ -486,6 +515,10 @@
                         leaderboardIsSetScoreSupportedText.innerText = bridge.leaderboard.isSetScoreSupported
                         leaderboardIsGetEntriesSupportedText.innerText = bridge.leaderboard.isGetEntriesSupported
 
+                        achievementsIsSupportedText.innerText = bridge.achievements.isSupported
+                        achievementsIsGetListSupportedText.innerText = bridge.achievements.isGetListSupported
+                        achievementsIsNativePopupSupportedText.innerText = bridge.achievements.isNativePopupSupported
+
                         paymentsIsSupportedText.innerText = bridge.payments.isSupported
                         paymentsIsGetCatalogSupportedText.innerText = bridge.payments.isGetCatalogSupported
                         paymentsIsGetPurchasesSupportedText.innerText = bridge.payments.isGetPurchasesSupported
@@ -501,6 +534,7 @@
                         socialSection.style.display = 'block'
                         leaderboardSection.style.display = 'block'
                         paymentsSection.style.display = 'block'
+                        achievementsSection.style.display = 'block'
                         remoteConfigSection.style.display = 'block'
                         clipboardSection.style.display = 'block'
                     })
@@ -743,15 +777,6 @@
                 paymentsPurchaseButton.addEventListener('click', () => {
                     bridge.payments.purchase({
                         'yandex': document.getElementById('payments-id-input').value,
-                        'vk_play': {
-                            'merchant_param': {
-                                'amount': 100,
-                                'currency': 'RUB',
-                                'description': 'your description',
-                                'item_id': '776',
-                                'additional_param': 1
-                            }
-                        },
                         'playdeck': {
                             'amount': 1,
                             'description': 'your description',
@@ -771,6 +796,42 @@
                 paymentsConsumeButton.addEventListener('click', () => {
                     bridge.payments.consumePurchase({ 'yandex': document.getElementById('payments-token-input').value })
                         .catch((error) => console.log(error))
+                })
+
+                achievementsShowNativeButton.addEventListener('click', () => {
+                    bridge.achievements.showNativePopup()
+                        .catch((error) => console.log(error))
+                })
+                
+                achievementsGetListButton.addEventListener('click', () => {
+                    bridge.achievements.getList()
+                        .then((list) => achievementListContainer.innerText = JSON.stringify(list))
+                        .catch((error) => console.log(error))
+                })
+
+                achievementsUnlockButton.addEventListener('click', () => {
+                    let options = {};
+
+                    switch (bridge.platform.id) {
+                        case 'lagged':
+                            options = {
+                                achievement: achievementsIdInput.value,
+                            }
+                            break;
+                        case 'y8':
+                            options = {
+                                achievement: achievementsNameInput.value,
+                                achievementkey: achievementsIdInput.value,
+                            }
+                            break;
+                        default: 
+                            break;
+                    }
+
+                    bridge.achievements.unlock(options)
+                        .then((result) => achievementsUnlockStatusContainer.innerText = JSON.stringify(result))
+                        .catch((error) => console.log(error))
+
                 })
 
                 remoteConfigButton.addEventListener('click', () => {

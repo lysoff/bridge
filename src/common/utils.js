@@ -24,6 +24,25 @@ export const addJavaScript = function addJavaScript(src) {
     })
 }
 
+export const addAdsByGoogle = ({
+    hostId, adsenseId, channelId,
+}) => new Promise((resolve) => {
+    const script = document.createElement('script')
+    script.setAttribute('data-ad-client', adsenseId)
+
+    if (channelId) {
+        script.setAttribute('data-ad-channel', channelId)
+    } else if (hostId) {
+        script.setAttribute('data-ad-host', hostId)
+    }
+
+    script.setAttribute('data-ad-frequency-hint', '30s')
+    script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js'
+
+    script.addEventListener('load', resolve)
+    document.head.appendChild(script)
+})
+
 export const waitFor = function waitFor(...args) {
     if (args.length <= 0) {
         return Promise.resolve()

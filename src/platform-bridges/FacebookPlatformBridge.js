@@ -24,7 +24,6 @@ import {
     REWARDED_STATE,
     BANNER_STATE,
     STORAGE_TYPE,
-    ERROR,
     DEVICE_TYPE,
     PLATFORM_MESSAGE,
 } from '../constants'
@@ -145,33 +144,28 @@ class FacebookPlatformBridge extends PlatformBridgeBase {
         if (!promiseDecorator) {
             promiseDecorator = this._createPromiseDecorator(ACTION_NAME.INITIALIZE)
 
-            if (!this._options || !this._options.placementId) {
-                this._rejectPromiseDecorator(ACTION_NAME.INITIALIZE, ERROR.FACEBOOK_PLACEMENT_ID_IS_UNDEFINED)
-            } else {
-                addJavaScript(SDK_URL)
-                    .then(() => waitFor('FBInstant'))
-                    .then(() => {
-                        this._platformSdk = window.FBInstant
-                        return this._platformSdk.initializeAsync()
-                    })
-                    .then(() => {
-                        this._placementId = this._options.placementId
+            addJavaScript(SDK_URL)
+                .then(() => waitFor('FBInstant'))
+                .then(() => {
+                    this._platformSdk = window.FBInstant
+                    return this._platformSdk.initializeAsync()
+                })
+                .then(() => {
+                    this._placementId = this._options.placementId
 
-                        this._playerId = this._platformSdk.player.getID()
-                        this._playerName = this._platformSdk.player.getName()
-                        this._playerPhotos.push(this._platformSdk.player.getPhoto())
+                    this._playerId = this._platformSdk.player.getID()
+                    this._playerName = this._platformSdk.player.getName()
+                    this._playerPhotos.push(this._platformSdk.player.getPhoto())
 
-                        this._contextId = this._platformSdk.context.getID()
-                        this._platformLanguage = this._platformSdk.getLocale()
+                    this._contextId = this._platformSdk.context.getID()
+                    this._platformLanguage = this._platformSdk.getLocale()
 
-                        this._supportedApis = this._platformSdk.getSupportedAPIs()
-                        this._platformSdk.startGameAsync()
+                    this._supportedApis = this._platformSdk.getSupportedAPIs()
 
-                        this._isInitialized = true
-                        this._resolvePromiseDecorator(ACTION_NAME.INITIALIZE)
-                    })
-                    .catch((e) => this._resolvePromiseDecorator(ACTION_NAME.INITIALIZE, e))
-            }
+                    this._isInitialized = true
+                    this._resolvePromiseDecorator(ACTION_NAME.INITIALIZE)
+                })
+                .catch((e) => this._resolvePromiseDecorator(ACTION_NAME.INITIALIZE, e))
         }
 
         return promiseDecorator.promise
@@ -182,8 +176,9 @@ class FacebookPlatformBridge extends PlatformBridgeBase {
         switch (message) {
             case PLATFORM_MESSAGE.GAME_READY: {
                 this._platformSdk.setLoadingProgress(100)
-                this._platformSdk.startGameAsync()
-                return Promise.resolve()
+                return new Promise((resolve) => {
+                    this._platformSdk.startGameAsync().then(resolve)
+                })
             }
             default: {
                 return super.sendMessage(message)
