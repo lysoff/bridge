@@ -1,0 +1,48 @@
+
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+        tag_name:
+          description: 'Version tag v*'
+          required: true
+          type: string
+        release_name: 
+          description: 'Release name'
+          required: true
+          type: string
+        summary:
+          description: 'Release summary'
+          required: true
+          type: string
+
+jobs:
+  build:
+    permissions: write-all
+    name: Create release
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Zip files
+        run: npm run build
+
+      - name: Rename file 
+        run: |
+          data=$(sed -n '2p' "build/playgama-bridge.js")
+          echo "$data" > "build/playgama-bridge${{ inputs.tag_name }}.js"
+        
+      # Release
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag_name }}
+          name: ${{ inputs.release_name }}
+          body: ${{inputs.summary}}
+          files: build/playgama_bridge_${{inputs.tag_name}}.js
+          
