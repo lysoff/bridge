@@ -29,8 +29,8 @@ jobs:
         with:
           lfs: true
 
-      - name: Zip files
-        run: npm run build
+      - name: Build
+        run: npm i && npm run build
 
       - name: Rename file 
         run: |
