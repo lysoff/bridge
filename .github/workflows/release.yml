@@ -30,13 +30,12 @@ jobs:
           lfs: true
 
       - name: Build
-        run: npm i && npm run build
-
-      - name: Rename file 
-        run: |
-          data=$(sed -n '2p' "dist/playgama-bridge.js")
+        run: | 
+          npm i 
+          && npm run build
+          && data=$(sed -n '2p' "dist/playgama-bridge.js")
           echo "$data" > "dist/playgama-bridge.js"
-        
+
       # Release
       - name: Release
         uses: softprops/action-gh-release@v2
