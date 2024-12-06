@@ -32,8 +32,8 @@ jobs:
       - name: Build
         run: | 
           npm i 
-          && npm run build
-          && data=$(sed -n '2p' "dist/playgama-bridge.js")
+          npm run build
+          data=$(sed -n '2p' "dist/playgama-bridge.js")
           echo "$data" > "dist/playgama-bridge.js"
 
       # Release
