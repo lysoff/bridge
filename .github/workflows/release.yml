@@ -43,7 +43,7 @@ jobs:
           # echo "$(echo $PR_DETAILS | jq -r '.body')" >> $GITHUB_ENV
           # echo "EOF" >> $GITHUB_ENV
           # # echo "::set-output name=dynamic_var::${{ env.PR_BODY }}"
-          echo "::set-output name=pr_description::$(echo "$PR_DETAILS" | sed ':a;N;$!ba;s/\n/\\n/g')"
+          echo "::set-output name=pr_description::$(echo "$(echo $PR_DETAILS | jq -r '.body')" | sed ':a;N;$!ba;s/\n/\\n/g')"
           
         env:
           GH_TOKEN: ${{ github.token }}
