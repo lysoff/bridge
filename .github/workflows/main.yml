@@ -1,0 +1,30 @@
+name: Show PR Description
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_id:
+        description: "Pull Request ID"
+        required: true
+        type: string
+
+jobs:
+  fetch-pr-details:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Fetch PR details
+      id: fetch-pr
+      run: |
+        PR_ID=${{ inputs.pr_id }}
+        PR_DETAILS=$(gh pr view $PR_ID --json title,body | jq '.')
+        echo "PR_DETAILS=${PR_DETAILS}" >> $GITHUB_ENV
+        echo "PR_TITLE=$(echo $PR_DETAILS | jq -r '.title')" >> $GITHUB_ENV
+        echo "PR_BODY=$(echo $PR_DETAILS | jq -r '.body')" >> $GITHUB_ENV
+      env:
+        GITHUB_TOKEN: ${{ secrets.TRIGGER_REPO_TOKEN }}
+
+    - name: Display PR details
+      run: |
+        echo "Pull Request Title: ${{ env.PR_TITLE }}"
+        echo "Pull Request Description: ${{ env.PR_BODY }}"
