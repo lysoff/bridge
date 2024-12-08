@@ -36,10 +36,12 @@ jobs:
         id: fetch-pr
         run: |
           PR_ID=${{ inputs.pr_id }}
-          PR_DETAILS=$(gh pr view $PR_ID --json body | jq '.')
+          PR_DETAILS=$(gh pr view ${{ inputs.pr_id }} --json body | jq '.')
           echo "PR_BODY<<EOF" >> $GITHUB_ENV
           echo "$(echo $PR_DETAILS | jq -r '.body')" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
+          echo "PR_BODY=${{ env.PR_BODY }}" >> $GITHUB_ENV
+          
         env:
           GH_TOKEN: ${{ github.token }}
 
