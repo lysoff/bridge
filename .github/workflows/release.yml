@@ -18,8 +18,7 @@ on:
           type: string
 
 env:
-  PR_BODY: ""
-  PR: ""
+  PR: 1
 
 jobs:
   build:
@@ -41,7 +40,6 @@ jobs:
           echo "PR_BODY<<EOF" >> $GITHUB_ENV
           echo "$(echo $PR_DETAILS | jq -r '.body')" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
-          echo "PR=${{ inputs.pr_id }}" >> $GITHUB_ENV
           
         env:
           GH_TOKEN: ${{ github.token }}
@@ -66,7 +64,6 @@ jobs:
           
   trigger-build-unity:
     needs: build
-    permissions: write-all
     runs-on: ubuntu-latest
     steps:
       - name: Trigger workflow
@@ -86,7 +83,6 @@ jobs:
 
   trigger-build-construct:
     needs: build
-    permissions: write-all
     runs-on: ubuntu-latest
     steps:
       - name: Trigger workflow
@@ -101,7 +97,6 @@ jobs:
 
   trigger-build-godot:
     needs: build
-    permissions: write-all
     runs-on: ubuntu-latest
     steps:
       - name: Trigger workflow
@@ -116,7 +111,6 @@ jobs:
 
   trigger-build-godot-4:
     needs: build
-    permissions: write-all
     runs-on: ubuntu-latest
     steps:
       - name: Trigger workflow
