@@ -12,8 +12,8 @@ on:
           description: 'Release name'
           required: true
           type: string
-        summary:
-          description: 'Release summary'
+        pr_id:
+          description: 'Description PR'
           required: true
           type: string
 
@@ -28,6 +28,17 @@ jobs:
         uses: actions/checkout@v4
         with:
           lfs: true
+
+      - name: Fetch PR details
+        id: fetch-pr
+        run: |
+          PR_ID=${{ inputs.pr_id }}
+          PR_DETAILS=$(gh pr view $PR_ID --json body | jq '.')
+          echo "PR_BODY<<EOF" >> $GITHUB_ENV
+          echo "$(echo $PR_DETAILS | jq -r '.body')" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Build
         run: | 
