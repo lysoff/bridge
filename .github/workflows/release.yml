@@ -17,6 +17,9 @@ on:
           required: true
           type: string
 
+env:
+  PR_BODY: ""
+
 jobs:
   build:
     permissions: write-all
