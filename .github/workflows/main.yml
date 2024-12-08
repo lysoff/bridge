@@ -21,6 +21,15 @@ jobs:
       run: |
         PR_ID=${{ inputs.pr_id }}
         PR_DETAILS=$(gh pr view $PR_ID --json title,body | jq '.')
-        echo "Details: ${PR_DETAILS}"
+        echo "PR_TITLE=$(echo $PR_DETAILS | jq -r '.title')" >> $GITHUB_ENV
+        # Handle multi-line body correctly
+        echo "PR_BODY<<EOF" >> $GITHUB_ENV
+        echo "$(echo $PR_DETAILS | jq -r '.body')" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
       env:
-        GITHUB_TOKEN: ${{ secrets.TRIGGER_REPO_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Display PR details
+      run: |
+        echo "Pull Request Title: ${{ env.PR_TITLE }}"
+        echo "Pull Request Description: ${{ env.PR_BODY }}"
