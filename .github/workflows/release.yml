@@ -45,3 +45,63 @@ jobs:
           body: ${{inputs.summary}}
           files: dist/playgama-bridge.js
           
+  trigger-build-unity:
+    needs: build
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger workflow
+        env:
+          GITHUB_TOKEN: ${{ secrets.TRIGGER_REPO_TOKEN }}
+        run: |
+            curl -X POST \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              https://api.github.com/repos/lysoff/bridge-unity/actions/workflows/release.yml/dispatches \
+              -d '{"ref":"main", "inputs": { "tag_name": "${{ inputs.tag_name }}", "release_name": "${{ inputs.release_name }}", "summary": "${{ inputs.summary }}" }}'
+
+  trigger-build-construct:
+    needs: build
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger workflow
+        env:
+          GITHUB_TOKEN: ${{ secrets.TRIGGER_REPO_TOKEN }}
+        run: |
+            curl -X POST \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              https://api.github.com/repos/lysoff/bridge-construct/actions/workflows/release.yml/dispatches \
+              -d '{"ref":"main", "inputs": { "tag_name": "${{ inputs.tag_name }}", "release_name": "${{ inputs.release_name }}", "summary": "${{ inputs.summary }}" }}'
+
+  trigger-build-godot:
+    needs: build
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger workflow
+        env:
+          GITHUB_TOKEN: ${{ secrets.TRIGGER_REPO_TOKEN }}
+        run: |
+            curl -X POST \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              https://api.github.com/repos/lysoff/bridge-godot/actions/workflows/release.yml/dispatches \
+              -d '{"ref":"main", "inputs": { "tag_name": "${{ inputs.tag_name }}", "release_name": "${{ inputs.release_name }}", "summary": "${{ inputs.summary }}" }}'
+
+  trigger-build-godot-4:
+    needs: build
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger workflow
+        env:
+          GITHUB_TOKEN: ${{ secrets.TRIGGER_REPO_TOKEN }}
+        run: |
+            curl -X POST \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              https://api.github.com/repos/lysoff/bridge-godot-4/actions/workflows/release.yml/dispatches \
+              -d '{"ref":"main", "inputs": { "tag_name": "${{ inputs.tag_name }}", "release_name": "${{ inputs.release_name }}", "summary": "${{ inputs.summary }}" }}'
+        
