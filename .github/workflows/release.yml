@@ -39,11 +39,11 @@ jobs:
         run: |
           PR_ID=${{ inputs.pr_id }}
           PR_DETAILS=$(gh pr view ${{ inputs.pr_id }} --json body | jq '.')
-          echo "PR_BODY<<EOF" >> $GITHUB_ENV
-          echo "$(echo $PR_DETAILS | jq -r '.body')" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-          # echo "::set-output name=dynamic_var::${{ env.PR_BODY }}"
-          echo "::set-output name=pr_description::$(echo "$PR_BODY" | sed ':a;N;$!ba;s/\n/\\n/g')"
+          # echo "PR_BODY<<EOF" >> $GITHUB_ENV
+          # echo "$(echo $PR_DETAILS | jq -r '.body')" >> $GITHUB_ENV
+          # echo "EOF" >> $GITHUB_ENV
+          # # echo "::set-output name=dynamic_var::${{ env.PR_BODY }}"
+          echo "::set-output name=pr_description::$(echo "$PR_DETAILS" | sed ':a;N;$!ba;s/\n/\\n/g')"
           
         env:
           GH_TOKEN: ${{ github.token }}
