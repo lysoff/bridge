@@ -57,7 +57,7 @@ jobs:
         with:
           tag_name: ${{ inputs.tag_name }}
           name: ${{ inputs.release_name }}
-          body: $PR_BODY
+          body: ${{ PR_BODY }}
           files: |
             dist/playgama-bridge.js
             dist/index.html
