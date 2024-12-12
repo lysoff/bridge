@@ -39,9 +39,9 @@ jobs:
         run: |
           PR_ID=${{ inputs.pr_id }}
           PR_DETAILS=$(gh pr view ${{ inputs.pr_id }} --json body | jq '.')
-          echo "PR_BODY<<EOF" >> $GITHUB_OUTPUTS
-          echo "$(echo $PR_DETAILS | jq -r '.body')" >> $GITHUB_OUTPUTS
-          echo "EOF" >> $GITHUB_OUTPUTS
+          echo "PR_BODY<<EOF" >> $GITHUB_OUTPUT
+          echo "$(echo $PR_DETAILS | jq -r '.body')" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
         env:
           GH_TOKEN: ${{ github.token }}
 
