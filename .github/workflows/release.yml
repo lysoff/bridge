@@ -12,14 +12,10 @@ on:
           description: 'Release name'
           required: true
           type: string
-        summary: 
-          description: 'Summary'
+        pr_id:
+          description: 'Description PR'
           required: true
           type: string
-        # pr_id:
-        #   description: 'Description PR'
-        #   required: true
-        #   type: string
 
 env:
   PR: 1
@@ -29,6 +25,8 @@ jobs:
     permissions: write-all
     name: Create release
     runs-on: ubuntu-latest
+    outputs:
+      description: ${{ steps.fetch-pr.outputs.PR_BODY }}
     steps:
       # Checkout
       - name: Checkout repository
@@ -36,16 +34,16 @@ jobs:
         with:
           lfs: true
 
-      # - name: Fetch PR details
-      #   id: fetch-pr
-      #   run: |
-      #     PR_ID=${{ inputs.pr_id }}
-      #     PR_DETAILS=$(gh pr view ${{ inputs.pr_id }} --json body | jq '.')
-      #     echo "PR_BODY<<EOF" >> $GITHUB_STATE
-      #     echo "$(echo $PR_DETAILS | jq -r '.body')" >> $GITHUB_STATE
-      #     echo "EOF" >> $GITHUB_STATE
-      #   env:
-      #     GH_TOKEN: ${{ github.token }}
+      - name: Fetch PR details
+        id: fetch-pr
+        run: |
+          PR_ID=${{ inputs.pr_id }}
+          PR_DETAILS=$(gh pr view ${{ inputs.pr_id }} --json body | jq '.')
+          echo "PR_BODY<<EOF" >> $GITHUB_OUTPUTS
+          echo "$(echo $PR_DETAILS | jq -r '.body')" >> $GITHUB_OUTPUTS
+          echo "EOF" >> $GITHUB_OUTPUTS
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Build
         run: | 
@@ -54,20 +52,13 @@ jobs:
           data=$(sed -n '2p' "dist/playgama-bridge.js")
           echo "$data" > "dist/playgama-bridge.js"
 
-      # - name: Prepare Release Body
-      #   id: prepare-release
-      #   run: |
-      #     # Access PR_BODY and decode newlines
-      #     RELEASE_BODY=$(echo "$PR_BODY" | sed 's/\\n/\n/g')
-      #     echo "RELEASE_BODY=$RELEASE_BODY" >> $GITHUB_ENV
-
       # Release
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ inputs.tag_name }}
           name: ${{ inputs.release_name }}
-          body: ${{ inputs.summary }}
+          body: ${{ steps.fetch-pr.outputs.PR_BODY }}
           files: |
             dist/playgama-bridge.js
             dist/index.html
@@ -83,7 +74,7 @@ jobs:
             JSON_PAYLOAD=$(jq -n \
               --arg tag_name "${{ inputs.tag_name }}" \
               --arg release_name "${{ inputs.release_name }}" \
-              --arg summary "${{ inputs.release_name }}" \
+              --arg summary "${{ needs.build.outputs.description }}" \
               '{ref: "main", inputs: {tag_name: $tag_name, release_name: $release_name, summary: $summary}}')
             curl -X POST \
               -H "Accept: application/vnd.github+json" \
